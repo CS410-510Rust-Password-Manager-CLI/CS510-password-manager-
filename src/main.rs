@@ -1,3 +1,4 @@
+use chrono::prelude::*;
 use std::env;
 use rand::{Rng, thread_rng};
 use rand::distributions::Alphanumeric;
@@ -29,4 +30,5 @@ fn main() {
     let generated_pass = genpass(length);
     println!("{}", generated_pass);
     println!("{}", generated_pass.len());
+    println!("{}", Utc::now().date().naive_utc());
 }
