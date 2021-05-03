@@ -14,10 +14,10 @@ fn genpass(length: u32) -> String {
     rand_string
 }
 
+///CLI menu for the program. Lists the options the user has, and takes user input.
 fn menu() {
-    let mut again = true;
-    let mut buffer = String::new();
-    let mut _stdin = io::stdin();
+    let mut again = true; //loop control
+    let mut buffer = String::new(); //store user input
     let mut selection: u32;
     while again {
         println!("\n*PASSWORD MANAGER CLI*\n");
@@ -25,10 +25,17 @@ fn menu() {
         println!("9. exit\n");
         print!("Selection: ");
         io::stdout().flush().unwrap();
+
+        //read user input
         io::stdin()
             .read_line(&mut buffer)
             .expect("could not read input");
-        selection = buffer.trim().parse().expect("invalid input");
+
+        //parse user input to u32
+        selection = buffer
+            .trim()
+            .parse()
+            .expect("invalid user input, expecting integer");
         buffer.clear();
 
         let length: u32 = 20;
