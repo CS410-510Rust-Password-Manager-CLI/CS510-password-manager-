@@ -1,14 +1,7 @@
 use chrono::prelude::*;
-use std::env;
-use rand::{Rng, thread_rng};
 use rand::distributions::Alphanumeric;
-
-
-/// Parse the given string as a `u32`.
-fn parsenum(s: &str) -> u32 {
-    let n: u32 = s.parse().unwrap();
-    u32::from(n)
-}
+use rand::{thread_rng, Rng};
+use std::io::{self, Write};
 
 ///generates a random alphanumeric string, with a length of the passed in integer
 /// random character code from: (https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html)
@@ -18,17 +11,43 @@ fn genpass(length: u32) -> String {
         .take(length as usize)
         .map(char::from)
         .collect();
-        rand_string
+    rand_string
+}
+
+fn menu() {
+    let mut again = true;
+    let mut buffer = String::new();
+    let mut _stdin = io::stdin();
+    let mut selection: u32;
+    while again {
+        println!("\n*PASSWORD MANAGER CLI*\n");
+        println!("1. generate new password");
+        println!("9. exit\n");
+        print!("Selection: ");
+        io::stdout().flush().unwrap();
+        io::stdin()
+            .read_line(&mut buffer)
+            .expect("could not read input");
+        selection = buffer.trim().parse().expect("invalid input");
+        buffer.clear();
+
+        let length: u32 = 20;
+        match selection {
+            1 => {
+                let password = genpass(length);
+                println!("\nGenerated password: {}", password);
+                println!("Date generated: {}", Utc::now().date().naive_utc());
+            }
+            9 => {
+                again = false;
+            }
+            _ => {
+                println!("\n~Invalid input~")
+            }
+        }
+    }
 }
 
 fn main() {
-    let args: Vec<String> = env::args().skip(1).collect();
-    assert!(args.len() >= 1, "arguments needed"); //make sure an argument is passed in
-    let length: u32 = parsenum(&args[0]);
-
-
-    let generated_pass = genpass(length);
-    println!("{}", generated_pass);
-    println!("{}", generated_pass.len());
-    println!("{}", Utc::now().date().naive_utc());
+    menu();
 }
