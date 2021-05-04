@@ -14,6 +14,29 @@ fn genpass(length: u32) -> String {
     rand_string
 }
 
+/*
+have a config file located at ~/.passstore/.config
+* passmanager init <name> - create a new password store
+                          - create a pgp key to encrypt the password file store with
+                          - write the file to ~/.passwordstore/stores/<name>
+  passmanager - ls of all password stores
+
+  passmanager <name of store> --create --genpass --name <name of password>
+  passmanager <name of store> --modify
+  passmanager <name of store> --list
+
+       password record:
+            id:
+            encrpytion:
+            secret:
+            access-time:
+            last-modified:
+            user-defined fields:
+                - secret question
+
+ */
+
+
 ///CLI menu for the program. Lists the options the user has, and takes user input.
 fn menu() {
     let mut again = true; //loop control
