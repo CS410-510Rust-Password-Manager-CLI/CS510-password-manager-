@@ -78,6 +78,40 @@ fn menu() {
     }
 }
 
+fn init(store_name: &str){
+    // Check if .passwordmanager dir exists
+    let base_path: &str = "~/.passmanager";
+    if !std::path::Path::new(base_path).is_dir(){
+        println!("Base path does not exist! Creating new one!")
+    }
+    return
+}
+
 fn main() {
-    menu();
+    // Get all command line args
+    let args: Vec<String> = std::env::args().collect();
+
+    // List all password stores
+    if args.len() == 1{
+        println!("Getting all password stores!");
+        return
+    }
+
+    // Parse all other args
+    match args[1].as_str() {
+        "init" => {
+            let store_name = args.get(2).expect("Did not get store name for option 'Init'");
+            println!("Init new password store: {}", store_name);
+            init(store_name);
+        }
+        "create" => {
+            println!("Creating new password")
+        }
+        _ => {
+            println!("Unknown arg: {}", args[1])
+        }
+    }
+
+    return
+    //menu();
 }
