@@ -82,9 +82,25 @@ fn init(store_name: &str){
     // Check if .passwordmanager dir exists
     let base_path: &str = "~/.passmanager";
     if !std::path::Path::new(base_path).is_dir(){
+        // Create dir if path doesn't exist
         println!("Base path does not exist! Creating new one!")
     }
+    // TODO: Create store file
+    // TODO: Store file encryption
     return
+}
+
+fn get_stores(){
+    let base_path: &str = "~/.passmanager";
+    //TODO: Crawl through password dir and print all store names
+    //TODO: Maybe store names should be encrypted as well?
+    //TODO: Decrypt store names and print to screen
+}
+
+fn create(store_name: &str){
+    //Need a store name and then add secrets to that store
+    //This can use the CLI Menu format that we had in the menu function
+    //Can add option to allow auto generation of secrets or to allow a user to use their own
 }
 
 fn main() {
@@ -94,12 +110,14 @@ fn main() {
     // List all password stores
     if args.len() == 1{
         println!("Getting all password stores!");
+        get_stores();
         return
     }
 
     // Parse all other args
     match args[1].as_str() {
         "init" => {
+            // TODO: Catch the panic here and just print message
             let store_name = args.get(2).expect("Did not get store name for option 'Init'");
             println!("Init new password store: {}", store_name);
             init(store_name);
