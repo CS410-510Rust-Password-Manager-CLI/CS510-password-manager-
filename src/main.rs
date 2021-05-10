@@ -39,6 +39,47 @@ have a config file located at ~/.passstore/.config
 
  */
 
+ /*
+fn menu() {
+    let mut again = true; //loop control
+    let mut buffer = String::new(); //store user input
+    let mut selection: u32;
+    while again {
+        println!("\n*PASSWORD MANAGER CLI*\n");
+        println!("1. generate new password");
+        println!("9. exit\n");
+        print!("Selection: ");
+        io::stdout().flush().unwrap();
+
+        //read user input
+        io::stdin()
+            .read_line(&mut buffer)
+            .expect("could not read input");
+
+        //parse user input to u32
+        selection = buffer
+            .trim()
+            .parse()
+            .expect("invalid user input, expecting integer");
+        buffer.clear();
+
+        let length: u32 = 20;
+        match selection {
+            1 => {
+                let password = genpass(length);
+                println!("\nGenerated password: {}", password);
+                println!("Date generated: {}", Utc::now().date().naive_utc());
+            }
+            9 => {
+                again = false;
+            }
+            _ => {
+                println!("\n~Invalid input~")
+            }
+        }
+    }
+}
+*/
 
 
 fn init(store_name: &str) {
