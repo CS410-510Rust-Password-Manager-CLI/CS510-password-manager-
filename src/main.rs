@@ -1,10 +1,9 @@
 use chrono::prelude::*;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use std::io::{self, Write};
 use std::fs;
+use std::io::{self, Write};
 use std::path::PathBuf;
-
 
 ///generates a random alphanumeric string, with a length of the passed in integer
 /// random character code from: (https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html)
@@ -39,7 +38,7 @@ have a config file located at ~/.passstore/.config
 
  */
 
- /*
+/*
 fn menu() {
     let mut again = true; //loop control
     let mut buffer = String::new(); //store user input
@@ -81,11 +80,10 @@ fn menu() {
 }
 */
 
-
 fn init(store_name: &str) {
     // Check if .passwordmanager dir exists
     let base_path: &str = "~/.passmanager";
-    if !std::path::Path::new(base_path).is_dir(){
+    if !std::path::Path::new(base_path).is_dir() {
         // Create dir if path doesn't exist
         println!("Base path does not exist!");
         let created = fs::create_dir_all(base_path);
@@ -94,6 +92,7 @@ fn init(store_name: &str) {
             Err(e) => println!("Error creating new path: {}", e),
         }
     }
+
     //creating path for new file
     let mut pathfilestring: String = "".to_owned();
     pathfilestring.push_str(base_path);
@@ -103,21 +102,30 @@ fn init(store_name: &str) {
     //write to file
     let mut path = PathBuf::new();
     path.push(pathfilestring);
-    std::fs::write(path, "test");
+    let written = std::fs::write(path, "test");
+    match written {
+        Ok(()) => println!("Successfully written to file"),
+        Err(e) => println!("Unable to write to file: {}", e),
+    }
+
     // TODO: Create store file
     // TODO: Store file encryption
 }
 
-
-
-fn get_stores(){
+fn get_stores() {
     let base_path: &str = "~/.passmanager";
+    let files = fs::read_dir(base_path).unwrap();
+
+    //print names of all files in the base directory
+    for file in files {
+        println!("Filename: {:?}", file.unwrap().file_name())
+    }
     //TODO: Crawl through password dir and print all store names
     //TODO: Maybe store names should be encrypted as well?
     //TODO: Decrypt store names and print to screen
 }
 
-fn create(store_name: &str){
+fn create(store_name: &str) {
     //Need a store name and then add secrets to that store
     //This can use the CLI Menu format that we had in the menu function
     //Can add option to allow auto generation of secrets or to allow a user to use their own
@@ -128,17 +136,19 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
 
     // List all password stores
-    if args.len() == 1{
+    if args.len() == 1 {
         println!("Getting all password stores!");
         get_stores();
-        return
+        return;
     }
 
     // Parse all other args
     match args[1].as_str() {
         "init" => {
             // TODO: Catch the panic here and just print message
-            let store_name = args.get(2).expect("Did not get store name for option 'Init'");
+            let store_name = args
+                .get(2)
+                .expect("Did not get store name for option 'Init'");
             println!("Init new password store: {}", store_name);
             init(store_name);
         }
@@ -149,6 +159,6 @@ fn main() {
             println!("Unknown arg: {}", args[1])
         }
     }
-
-    return
+    get_stores();
+    return;
 }
