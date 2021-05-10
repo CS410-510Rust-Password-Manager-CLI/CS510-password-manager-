@@ -2,6 +2,9 @@ use chrono::prelude::*;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use std::io::{self, Write};
+use std::fs;
+use std::path::PathBuf;
+
 
 ///generates a random alphanumeric string, with a length of the passed in integer
 /// random character code from: (https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html)
@@ -38,17 +41,33 @@ have a config file located at ~/.passstore/.config
 
 
 
-fn init(store_name: &str){
+fn init(store_name: &str) {
     // Check if .passwordmanager dir exists
     let base_path: &str = "~/.passmanager";
     if !std::path::Path::new(base_path).is_dir(){
         // Create dir if path doesn't exist
-        println!("Base path does not exist! Creating new one!")
+        println!("Base path does not exist!");
+        let created = fs::create_dir_all(base_path);
+        match created {
+            Ok(()) => println!("New base path created"),
+            Err(e) => println!("Error creating new path: {}", e),
+        }
     }
+    //creating path for new file
+    let mut pathfilestring: String = "".to_owned();
+    pathfilestring.push_str(base_path);
+    pathfilestring.push_str("/");
+    pathfilestring.push_str(store_name);
+
+    //write to file
+    let mut path = PathBuf::new();
+    path.push(pathfilestring);
+    std::fs::write(path, "test");
     // TODO: Create store file
     // TODO: Store file encryption
-    return
 }
+
+
 
 fn get_stores(){
     let base_path: &str = "~/.passmanager";
