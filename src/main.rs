@@ -114,6 +114,15 @@ fn init(store_name: &str) {
 
 fn get_stores() {
     let base_path: &str = "~/.passmanager";
+    let testfiles = fs::read_dir(base_path);
+    match testfiles {
+        Ok(_v) => (),
+        Err(_e) => {
+            println!("Error: the base path does not exist or the process lacks permissions to view the contents");
+            return;
+        }
+    }
+
     let files = fs::read_dir(base_path).unwrap();
 
     //print names of all files in the base directory
@@ -159,6 +168,5 @@ fn main() {
             println!("Unknown arg: {}", args[1])
         }
     }
-    get_stores();
     return;
 }
