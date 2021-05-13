@@ -4,6 +4,7 @@ use rand::{thread_rng, Rng};
 use std::fs;
 use std::io::{self, Write};
 use std::path::PathBuf;
+extern crate home;
 
 ///generates a random alphanumeric string, with a length of the passed in integer
 /// random character code from: (https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html)
@@ -82,30 +83,44 @@ fn menu() {
 
 fn init(store_name: &str) {
     // Check if .passwordmanager dir exists
-    let base_path: &str = "~/.passmanager";
-    if !std::path::Path::new(base_path).is_dir() {
-        // Create dir if path doesn't exist
-        println!("Base path does not exist!");
-        let created = fs::create_dir_all(base_path);
-        match created {
-            Ok(()) => println!("New base path created"),
-            Err(e) => println!("Error creating new path: {}", e),
+    // check if a homedir env variable exits
+    let hdir = home::home_dir();
+    match hdir {
+        Some(path) => {
+            //a home env variable exists
+            println!("Found home dir: {}", path.display());
+            let mut hdirfinal = path.display().to_string();
+            hdirfinal.push_str("/.passmanager");
+
+            if !std::path::Path::new(&hdirfinal).is_dir() {
+                // Create dir if path doesn't exist
+                println!("Base path does not exist!");
+                let created = fs::create_dir_all(&hdirfinal);
+                match created {
+                    Ok(()) => println!("New base path created"),
+                    Err(e) => println!("Error creating new path: {}", e),
+                }
+            }
+
+            //creating path for new file
+            let mut pathfilestring: String = "".to_owned();
+            pathfilestring.push_str(&hdirfinal);
+            pathfilestring.push('/');
+            pathfilestring.push_str(store_name);
+
+            //write to file
+            let mut path = PathBuf::new();
+            path.push(pathfilestring);
+            let written = std::fs::write(path, "test");
+            match written {
+                Ok(()) => println!("Successfully written to file"),
+                Err(e) => println!("Unable to write to file: {}", e),
+            }
         }
-    }
-
-    //creating path for new file
-    let mut pathfilestring: String = "".to_owned();
-    pathfilestring.push_str(base_path);
-    pathfilestring.push_str("/");
-    pathfilestring.push_str(store_name);
-
-    //write to file
-    let mut path = PathBuf::new();
-    path.push(pathfilestring);
-    let written = std::fs::write(path, "test");
-    match written {
-        Ok(()) => println!("Successfully written to file"),
-        Err(e) => println!("Unable to write to file: {}", e),
+        None => {
+            println!("Impossible to get your home dir!");
+            return;
+        }
     }
 
     // TODO: Create store file
@@ -113,25 +128,34 @@ fn init(store_name: &str) {
 }
 
 fn get_stores() {
-    let base_path: &str = "~/.passmanager";
-    let testfiles = fs::read_dir(base_path);
-    match testfiles {
-        Ok(_v) => (),
-        Err(_e) => {
-            println!("Error: the base path does not exist or the process lacks permissions to view the contents");
-            return;
+    let hdir = home::home_dir();
+    match hdir {
+        Some(path) => {
+            let mut hdirfinal = path.display().to_string();
+            hdirfinal.push_str("/.passmanager");
+            let testfiles = fs::read_dir(&hdirfinal);
+            match testfiles {
+                Ok(_v) => (),
+                Err(_e) => {
+                    println!("Error: the base path does not exist or the process lacks permissions to view the contents");
+                    return;
+                }
+            }
+
+            let files = fs::read_dir(&hdirfinal).unwrap();
+
+            //print names of all files in the base directory
+            for file in files {
+                println!("Filename: {:?}", file.unwrap().file_name())
+            }
+            //TODO: Crawl through password dir and print all store names
+            //TODO: Maybe store names should be encrypted as well?
+            //TODO: Decrypt store names and print to screen
+        }
+        None => {
+            println!("Impossible to get your home dir!");
         }
     }
-
-    let files = fs::read_dir(base_path).unwrap();
-
-    //print names of all files in the base directory
-    for file in files {
-        println!("Filename: {:?}", file.unwrap().file_name())
-    }
-    //TODO: Crawl through password dir and print all store names
-    //TODO: Maybe store names should be encrypted as well?
-    //TODO: Decrypt store names and print to screen
 }
 
 fn create(store_name: &str) {
@@ -168,5 +192,4 @@ fn main() {
             println!("Unknown arg: {}", args[1])
         }
     }
-    return;
 }
