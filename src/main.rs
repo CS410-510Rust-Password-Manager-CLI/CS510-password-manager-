@@ -4,6 +4,12 @@ use rand::{thread_rng, Rng};
 use std::fs;
 use std::io::{self, Write};
 use std::path::PathBuf;
+use google_authenticator;
+use google_authenticator::{GoogleAuthenticator, ErrorCorrectionLevel};
+use rpassword::read_password;
+
+mod init;
+
 extern crate home;
 
 ///generates a random alphanumeric string, with a length of the passed in integer
@@ -81,52 +87,6 @@ fn menu() {
 }
 */
 
-fn init(store_name: &str) {
-    // Check if .passwordmanager dir exists
-    // check if a homedir env variable exits
-    let hdir = home::home_dir();
-    match hdir {
-        Some(path) => {
-            //a home env variable exists
-            println!("Found home dir: {}", path.display());
-            let mut hdirfinal = path.display().to_string();
-            hdirfinal.push_str("/.passmanager");
-
-            if !std::path::Path::new(&hdirfinal).is_dir() {
-                // Create dir if path doesn't exist
-                println!("Base path does not exist!");
-                let created = fs::create_dir_all(&hdirfinal);
-                match created {
-                    Ok(()) => println!("New base path created"),
-                    Err(e) => println!("Error creating new path: {}", e),
-                }
-            }
-
-            //creating path for new file
-            let mut pathfilestring: String = "".to_owned();
-            pathfilestring.push_str(&hdirfinal);
-            pathfilestring.push('/');
-            pathfilestring.push_str(store_name);
-
-            //write to file
-            let mut path = PathBuf::new();
-            path.push(pathfilestring);
-            let written = std::fs::write(path, "test");
-            match written {
-                Ok(()) => println!("Successfully written to file"),
-                Err(e) => println!("Unable to write to file: {}", e),
-            }
-        }
-        None => {
-            println!("Impossible to get your home dir!");
-            return;
-        }
-    }
-
-    // TODO: Create store file
-    // TODO: Store file encryption
-}
-
 fn get_stores() {
     let hdir = home::home_dir();
     match hdir {
@@ -164,9 +124,77 @@ fn create(store_name: &str) {
     //Can add option to allow auto generation of secrets or to allow a user to use their own
 }
 
+fn authenticate(){
+    todo!()
+}
+
+fn setup_mfa(auth: GoogleAuthenticator, secret: &str){
+    // Set up authenticator
+    //let auth = GoogleAuthenticator::new();
+    println!(
+        "{}",
+        auth.qr_code_url(secret, "qr_code", "name", 200, 200, ErrorCorrectionLevel::High)
+    );
+}
+
+fn check_secret(auth: GoogleAuthenticator){
+    let secret = "I3VFM3JKMNDJCDH5BMBEEQAW6KJ6NOE4";
+    let code = auth.get_code(secret, 0).unwrap();
+    if auth.verify_code(secret, code.as_str(), 1, 0){
+        println!("match!");
+    }else{
+        println!("false!")
+    }
+}
+
+// Gets user password without revealing it on the command line
+fn get_password(){
+    print!("Password: ");
+    std::io::stdout().flush().unwrap();
+    let password = read_password().unwrap();
+    println!("The password is: {}", password);
+}
+
+fn first_boot(){
+    // Setup password for general operation of CLI
+
+    // Encrypt that password
+
+}
+
 fn main() {
     // Get all command line args
     let args: Vec<String> = std::env::args().collect();
+
+    //TODO: Create config file
+    // Create master key and secret key
+    //
+
+    //TODO: Before we can give user access to stores and functions user must enter password
+    // Password gives user a set of credentials to unlock stores
+    // Creds will last a certain amount of time before a user must reauthenicate
+
+    //TODO: Require password entry
+
+
+    let error = init::set_global_password();
+    match error {
+        Ok(_) => println!("The password is:"),
+        Err(e) => println!("error: {}", e),
+    };
+
+    let error = init::get_password();
+    match error {
+        Ok(_) => println!("The password is:"),
+        Err(e) => println!("error: {}", e),
+    };
+
+    //get_password();
+
+    // let auth = GoogleAuthenticator::new().copy();
+    // let secret = "I3VFM3JKMNDJCDH5BMBEEQAW6KJ6NOE3";
+    // setup(auth);
+    // check_secret(auth);
 
     // List all password stores
     if args.len() == 1 {
@@ -183,7 +211,7 @@ fn main() {
                 .get(2)
                 .expect("Did not get store name for option 'Init'");
             println!("Init new password store: {}", store_name);
-            init(store_name);
+            //init::init(store_name);
         }
         "create" => {
             println!("Creating new password")

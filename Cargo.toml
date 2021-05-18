@@ -10,3 +10,10 @@ edition = "2018"
 rand = "0.8.0"
 chrono = "0.4"
 home = "0.5.3"
+rpassword = "0.0.4"
+keyring = "0.10.1"
+text_io = "0.1.8"
+
+[dependencies.google-authenticator]
+google-authenticator = "0.2.1"
+features = ["with-qrcode"]
