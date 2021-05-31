@@ -1,9 +1,9 @@
 use chrono::prelude::*;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use std::fs;
+use std::fs::*;
 use std::io::{self, Write};
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use google_authenticator;
 use google_authenticator::{GoogleAuthenticator, ErrorCorrectionLevel};
 use rpassword::read_password;
@@ -93,7 +93,7 @@ fn get_stores() {
         Some(path) => {
             let mut hdirfinal = path.display().to_string();
             hdirfinal.push_str("/.passmanager");
-            let testfiles = fs::read_dir(&hdirfinal);
+            let testfiles = read_dir(&hdirfinal);
             match testfiles {
                 Ok(_v) => (),
                 Err(_e) => {
@@ -102,7 +102,7 @@ fn get_stores() {
                 }
             }
 
-            let files = fs::read_dir(&hdirfinal).unwrap();
+            let files = read_dir(&hdirfinal).unwrap();
 
             //print names of all files in the base directory
             for file in files {
@@ -122,6 +122,63 @@ fn create(store_name: &str) {
     //Need a store name and then add secrets to that store
     //This can use the CLI Menu format that we had in the menu function
     //Can add option to allow auto generation of secrets or to allow a user to use their own
+    let hdir = home::home_dir();
+    match hdir {
+        Some(path) => {
+            let mut hdirfinal = path.display().to_string();
+            hdirfinal.push_str("/.passmanager");
+
+            if !Path::new(&hdirfinal).is_dir() {
+                // Create dir if path doesn't exist
+                println!("Base path does not exist!");
+                let created = create_dir_all(&hdirfinal);
+                match created {
+                    Ok(()) => println!("New base path created"),
+                    Err(e) => println!("Error creating new path: {}", e),
+                }
+            }
+
+            let files = read_dir(&hdirfinal).unwrap();
+            for file in files {
+                if file.unwrap().file_name() == store_name {
+                    println!("Store name already exists");
+                    return;
+                }
+            }
+
+            //store name does not already exist
+            //creating path for new file
+            let mut pathfilestring: String = "".to_owned();
+            pathfilestring.push_str(&hdirfinal);
+            pathfilestring.push('/');
+            pathfilestring.push_str(store_name);
+            pathfilestring.push_str(".txt");
+
+            let mut passfile = PathBuf::new();
+            passfile.push(pathfilestring);
+
+            let passanddate = passanddate();
+            let written = write(path, passanddate);
+            match written {
+                Ok(()) => println!("Successfully written to file"),
+                Err(e) => println!("Unable to write to file: {}", e),
+            }
+
+        }
+        None => {
+            println!("Impossible to get your home dir!");
+            return;
+        }
+    }
+}
+
+fn passanddate() -> String {
+    let password = genpass(20);
+    let date = Utc::now().date().naive_utc().to_string();
+    let mut finalwrite = password.clone();
+    finalwrite.push('\n');
+    finalwrite.push_str(&date);
+    return finalwrite;
 }
 
 fn authenticate(){
@@ -214,7 +271,8 @@ fn main() {
             //init::init(store_name);
         }
         "create" => {
-            println!("Creating new password")
+            println!("Created new password");
+            create(args[2].as_str());
         }
         _ => {
             println!("Unknown arg: {}", args[1])

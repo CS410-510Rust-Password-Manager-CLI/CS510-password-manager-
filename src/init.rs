@@ -84,6 +84,7 @@ pub fn setup(store_name: &str) {
             pathfilestring.push_str(&hdirfinal);
             pathfilestring.push('/');
             pathfilestring.push_str(store_name);
+            pathfilestring.push_str(".txt");
 
             //write to file
             let mut path = PathBuf::new();
