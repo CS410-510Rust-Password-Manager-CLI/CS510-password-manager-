@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use std::fs::*;
+use std::fs::{read_dir, create_dir_all, write};
 use std::io::{self, Write};
 use std::path::{PathBuf, Path};
 use google_authenticator;
