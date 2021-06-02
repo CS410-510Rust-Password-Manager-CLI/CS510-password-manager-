@@ -1,17 +1,17 @@
-extern crate std;
 extern crate home;
 extern crate keyring;
+extern crate std;
 
-use std::fs::{create_dir_all, write};
-use std::path::{PathBuf, Path};
-use std::error::{Error};
-use std::io::{self, Write, Read};
-use text_io::read;
 use rpassword::read_password;
+use std::error::Error;
+use std::fs::{create_dir_all, write};
+use std::io::{self, Read, Write};
+use std::path::{Path, PathBuf};
+use text_io::read;
 
 /*
-    Set a global password for the password store
- */
+   Set a global password for the password store
+*/
 pub fn set_global_password() -> Result<(), Box<dyn Error>> {
     let service = "password_store_cli";
 
@@ -31,7 +31,7 @@ pub fn set_global_password() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn get_password() -> Result<(), Box<dyn Error>>{
+pub fn get_password() -> Result<(), Box<dyn Error>> {
     let service = "password_store_cli";
 
     print!("Username: ");
@@ -47,17 +47,15 @@ pub fn get_password() -> Result<(), Box<dyn Error>>{
     Ok(())
 }
 
-pub fn initial_setup(){
+pub fn initial_setup() {
     todo!();
 }
 
-pub fn create_user_configuration(){
-
-}
+pub fn create_user_configuration() {}
 
 /*
 
- */
+*/
 pub fn setup(store_name: &str) {
     // Check if .passwordmanager dir exists
     // check if a homedir env variable exits
