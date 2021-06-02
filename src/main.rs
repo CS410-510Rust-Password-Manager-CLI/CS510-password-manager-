@@ -1,16 +1,22 @@
 use chrono::prelude::*;
+use google_authenticator;
+use google_authenticator::{ErrorCorrectionLevel, GoogleAuthenticator};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use std::fs::{read_dir, create_dir_all, write};
-use std::io::{self, Write};
-use std::path::{PathBuf, Path};
-use google_authenticator;
-use google_authenticator::{GoogleAuthenticator, ErrorCorrectionLevel};
 use rpassword::read_password;
+use std::fs::{create_dir_all, read_dir, write};
+use std::io::{self, Write};
+use std::path::{Path, PathBuf};
 
 mod init;
 
 extern crate home;
+
+struct FileData {
+    id: String,
+    pass: String,
+    date: String,
+}
 
 ///generates a random alphanumeric string, with a length of the passed in integer
 /// random character code from: (https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html)
@@ -87,6 +93,7 @@ fn menu() {
 }
 */
 
+///Traverse to the home directory and checks for a .passmanager folder. If found, it will display the filenames of all files in the folder
 fn get_stores() {
     let hdir = home::home_dir();
     match hdir {
@@ -118,6 +125,7 @@ fn get_stores() {
     }
 }
 
+///Uses the user passed store name to create a file in the .passmanager folder. The file will contain a generated password, date created and user entered name.
 fn create(store_name: &str) {
     //Need a store name and then add secrets to that store
     //This can use the CLI Menu format that we had in the menu function
@@ -157,13 +165,27 @@ fn create(store_name: &str) {
             let mut passfile = PathBuf::new();
             passfile.push(pathfilestring);
 
-            let passanddate = passanddate();
-            let written = write(path, passanddate);
+            //get data for the store
+            let file_data = file_data();
+
+            //create string to store in file
+            let mut text: String;
+
+            text.push_str("id: ");
+            text.push_str(&file_data.id);
+            text.push_str("\n");
+            text.push_str("secret: ");
+            text.push_str(&file_data.pass);
+            text.push_str("\n");
+            text.push_str("date: ");
+            text.push_str(&file_data.date);
+            text.push_str("\n");
+
+            let written = write(path, text);
             match written {
                 Ok(()) => println!("Successfully written to file"),
                 Err(e) => println!("Unable to write to file: {}", e),
             }
-
         }
         None => {
             println!("Impossible to get your home dir!");
@@ -172,51 +194,71 @@ fn create(store_name: &str) {
     }
 }
 
-fn passanddate() -> String {
-    let password = genpass(20);
-    let date = Utc::now().date().naive_utc().to_string();
-    let mut finalwrite = password.clone();
-    finalwrite.push('\n');
-    finalwrite.push_str(&date);
-    return finalwrite;
+fn file_data() -> FileData {
+    let mut buffer = String::new();
+    print!("\nEnter name associated with data: ");
+    io::stdout().flush().unwrap();
+
+    //read user input
+    io::stdin()
+        .read_line(&mut buffer)
+        .expect("could not read input");
+
+    buffer.trim();
+
+    let name: String;
+    name = buffer;
+
+    let data = FileData {
+        pass: genpass(20),
+        id: name,
+        date: Utc::now().date().naive_utc().to_string(),
+    };
+    return data;
 }
 
-fn authenticate(){
+fn authenticate() {
     todo!()
 }
 
-fn setup_mfa(auth: GoogleAuthenticator, secret: &str){
+fn setup_mfa(auth: GoogleAuthenticator, secret: &str) {
     // Set up authenticator
     //let auth = GoogleAuthenticator::new();
     println!(
         "{}",
-        auth.qr_code_url(secret, "qr_code", "name", 200, 200, ErrorCorrectionLevel::High)
+        auth.qr_code_url(
+            secret,
+            "qr_code",
+            "name",
+            200,
+            200,
+            ErrorCorrectionLevel::High
+        )
     );
 }
 
-fn check_secret(auth: GoogleAuthenticator){
+fn check_secret(auth: GoogleAuthenticator) {
     let secret = "I3VFM3JKMNDJCDH5BMBEEQAW6KJ6NOE4";
     let code = auth.get_code(secret, 0).unwrap();
-    if auth.verify_code(secret, code.as_str(), 1, 0){
+    if auth.verify_code(secret, code.as_str(), 1, 0) {
         println!("match!");
-    }else{
+    } else {
         println!("false!")
     }
 }
 
 // Gets user password without revealing it on the command line
-fn get_password(){
+fn get_password() {
     print!("Password: ");
     std::io::stdout().flush().unwrap();
     let password = read_password().unwrap();
     println!("The password is: {}", password);
 }
 
-fn first_boot(){
+fn first_boot() {
     // Setup password for general operation of CLI
 
     // Encrypt that password
-
 }
 
 fn main() {
@@ -232,7 +274,6 @@ fn main() {
     // Creds will last a certain amount of time before a user must reauthenicate
 
     //TODO: Require password entry
-
 
     let error = init::set_global_password();
     match error {
