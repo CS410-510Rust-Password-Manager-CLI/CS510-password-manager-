@@ -1,6 +1,4 @@
 use chrono::prelude::*;
-use google_authenticator;
-use google_authenticator::{ErrorCorrectionLevel, GoogleAuthenticator};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use rpassword::read_password;
@@ -9,6 +7,7 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
 mod init;
+mod common;
 
 extern crate home;
 
@@ -221,32 +220,6 @@ fn authenticate() {
     todo!()
 }
 
-fn setup_mfa(auth: GoogleAuthenticator, secret: &str) {
-    // Set up authenticator
-    //let auth = GoogleAuthenticator::new();
-    println!(
-        "{}",
-        auth.qr_code_url(
-            secret,
-            "qr_code",
-            "name",
-            200,
-            200,
-            ErrorCorrectionLevel::High
-        )
-    );
-}
-
-fn check_secret(auth: GoogleAuthenticator) {
-    let secret = "I3VFM3JKMNDJCDH5BMBEEQAW6KJ6NOE4";
-    let code = auth.get_code(secret, 0).unwrap();
-    if auth.verify_code(secret, code.as_str(), 1, 0) {
-        println!("match!");
-    } else {
-        println!("false!")
-    }
-}
-
 // Gets user password without revealing it on the command line
 fn get_password() {
     print!("Password: ");
@@ -295,6 +268,7 @@ fn main() {
     // check_secret(auth);
 
     // List all password stores
+    // TODO: Potentially remove
     if args.len() == 1 {
         println!("Getting all password stores!");
         get_stores();
