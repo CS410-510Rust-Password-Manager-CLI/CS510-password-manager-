@@ -1,19 +1,19 @@
 extern crate home;
+use rpassword::read_password;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::path::{Path, PathBuf};
 use std::io::{self, Write};
-use rpassword::read_password;
+use std::path::{Path, PathBuf};
 
 // Global Configurations for the password manager
-pub enum GlobalConfiguration{
+pub enum GlobalConfiguration {
     HomeDir,
     StoreDir,
 }
 
 // Function to pass back home dir and store dir path locations
 impl GlobalConfiguration {
-    pub fn value(&self) -> super::errors::Result<String>{
+    pub fn value(&self) -> super::errors::Result<String> {
         let hdir = home::home_dir();
         match hdir {
             Some(path) => {
@@ -25,18 +25,16 @@ impl GlobalConfiguration {
                     GlobalConfiguration::StoreDir => {
                         hdirfinal.push_str("/.store");
                         Ok(hdirfinal)
-                    },
+                    }
                 }
             }
-            None => {
-                return Err(super::errors::PasswordStoreError::HomeDirError)
-            }
+            None => return Err(super::errors::PasswordStoreError::HomeDirError),
         }
     }
 }
 
 // Enum class for message templates for user message
-pub enum UserMessage<'a>{
+pub enum UserMessage<'a> {
     // Inform user that they are creating a new store
     CreatingNewStore(&'a str),
     // Inform user that they store creation was successful
@@ -49,15 +47,14 @@ pub enum UserMessage<'a>{
     CreatedEntrySuccessfully,
 }
 
-impl UserMessage<'_>{
+impl UserMessage<'_> {
     pub fn value(&self) -> String {
         let mut message = String::new();
         match *self {
             UserMessage::CreatingNewStore(store_name) => {
                 message.push_str(&format!("Creating store with name: {}", store_name));
                 message
-
-            },
+            }
             UserMessage::StoreCreationSuccessful => "Store created successfully!".to_string(),
             UserMessage::CreatedBaseDir => "Base dir created!".to_string(),
             UserMessage::CreatedStoreDir => "Base store dir created!".to_string(),
@@ -75,18 +72,18 @@ pub fn calculate_store_name_hash<T: Hash + ?Sized>(t: &T) -> u64 {
 }
 
 // Check if the base dir exists
-pub fn base_dir_exist() -> bool{
-    match GlobalConfiguration::HomeDir.value(){
+pub fn base_dir_exist() -> bool {
+    match GlobalConfiguration::HomeDir.value() {
         Ok(path) => Path::new(&path).is_dir(),
-        Err(e) => false
+        Err(e) => false,
     }
 }
 
 // Check if the store dir exists
-pub fn store_dir_exist() -> bool{
-    match GlobalConfiguration::StoreDir.value(){
+pub fn store_dir_exist() -> bool {
+    match GlobalConfiguration::StoreDir.value() {
         Ok(path) => Path::new(&path).is_dir(),
-        Err(e) => false
+        Err(e) => false,
     }
 }
 
@@ -97,4 +94,3 @@ fn get_password() {
     let password = read_password().unwrap();
     println!("The password is: {}", password);
 }
-
