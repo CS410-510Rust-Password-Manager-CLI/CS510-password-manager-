@@ -19,6 +19,8 @@ pub enum PasswordStoreError<'a> {
     ErrorMisMatchPasswordCreation,
     #[error("Could not generate new RSA private key!")]
     ErrorPrivateKeyGeneration,
+    #[error("Could not encrypt data")]
+    ErrorDataEncryption,
 }
 
 pub type Result<'a, T> = std::result::Result<T, PasswordStoreError<'a>>;

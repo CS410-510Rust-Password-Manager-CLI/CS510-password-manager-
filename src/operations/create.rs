@@ -5,6 +5,7 @@ use std::fs::{create_dir_all, read_dir, write};
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 
+use std::str;
 use text_io::read;
 use rpassword;
 
@@ -30,9 +31,18 @@ pub fn create_menu(store_name: &str) -> errors::Result<'static, ()>{
                     // Once the key is successfully written, read the key and generate a pub key
                     // to encrypt and save to file
                     let hashed_store_name = common::calculate_store_name_hash(store_name).to_string();
-                    common::encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name);
-
+                    common::encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name, &entry_name);
                     Ok(())
+                    // match common::encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name){
+                    //     Ok(data_box) => {
+                    //         let encrypted_username = &*(data_box.0);
+                    //
+                    //         println!("{}", str::from_utf8(&encrypted_username).unwrap());
+                    //         Ok(())
+                    //         //println!("{}", str::from_utf8(encrypted_password).unwrap())
+                    //     }
+                    //     Err(e) => Err(errors::PasswordStoreError::ErrorDataEncryption),
+                    // }
                 },
                 Err(e) => Err(errors::PasswordStoreError::ErrorPrivateKeyGeneration),
             }

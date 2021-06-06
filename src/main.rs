@@ -10,6 +10,7 @@ mod operations{
 }
 mod common;
 mod errors;
+mod data_model;
 
 extern crate home;
 
@@ -72,7 +73,7 @@ fn main() {
             },
             "create" => {
                 println!("Create");
-                if let Err(e) = operations::create::create_menu(){
+                if let Err(e) = operations::create::create_menu(store_name){
                     println!("{}", e);
                     std::process::exit(1);
                 }

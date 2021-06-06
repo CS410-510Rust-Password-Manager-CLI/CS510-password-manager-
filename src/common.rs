@@ -6,10 +6,11 @@ use rsa::{RSAPublicKey, RSAPrivateKey, PaddingScheme, PrivateKeyPemEncoding, Pub
 use rand::rngs::OsRng;
 use std::fs::File;
 use std::io::prelude::*;
+use std::str;
 use base64;
 
 use crate::errors;
-use std::borrow::Borrow;
+use crate::data_model;
 
 // Global Configurations for the password manager
 pub enum GlobalConfiguration{
@@ -127,9 +128,9 @@ pub fn create_new_rsa_private_key(key_name: &str) -> std::io::Result<()>{
     Ok(())
 }
 
-pub fn encrypt_data_with_private_key(key_name: &str, username: &str, password: &str, store_name: &str) -> std::io::Result<()>{
+pub fn encrypt_data_with_private_key(key_name: &str, username: &str, password: &str, store_name: &str, entry_name: &str) {
     let key_file_path = format!("{}/{}.pem", GlobalConfiguration::KeyStoreDir.value().unwrap(), key_name);
-    let mut file = File::open(key_file_path)?;
+    let mut file = File::open(key_file_path).unwrap();
     let mut priv_key_buf = String::new();
     file.read_to_string(&mut priv_key_buf);
 
@@ -144,13 +145,21 @@ pub fn encrypt_data_with_private_key(key_name: &str, username: &str, password: &
     let private_key = RSAPrivateKey::from_pkcs1(&der_bytes).expect("failed to parse key");
     let pub_key = RSAPublicKey::from(&private_key);
 
-    let enc_data = pub_key.encrypt(&mut rng, PaddingScheme::new_pkcs1v15(), username.as_bytes()).expect("failed to encrypt");
+    let mut rng = OsRng;
+    let enc_username_data = pub_key.encrypt(&mut rng, PaddingScheme::new_pkcs1v15_encrypt(), username.as_bytes()).expect("failed to encrypt username");
+    let enc_password_data = pub_key.encrypt(&mut rng, PaddingScheme::new_pkcs1v15_encrypt(), password.as_bytes()).expect("failed to encrypt password");
+
+    println!("{}", str::from_utf8(&enc_username_data).unwrap());
 
     //Write encrypted data to store file
-    let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), store_name);
-    let mut store_file = File::open(store_path);
+    // let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), store_name);
+    // let mut store_file = File::open(store_path)?;
+    //
+    // let new_entry = data_model::Entry{
+    //     name: entry_name.to_string(),
+    //
+    // }
 
-
-    Ok(())
+    //Ok()
 }
 
