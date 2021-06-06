@@ -128,6 +128,7 @@ pub fn create_new_rsa_private_key(key_name: &str) -> std::io::Result<()>{
 }
 
 pub fn encrypt_data_with_private_key(key_name: &str, username: &str, password: &str, store_name: &str) -> std::io::Result<()>{
+    let mut rng = OsRng;
     let key_file_path = format!("{}/{}.pem", GlobalConfiguration::KeyStoreDir.value().unwrap(), key_name);
     let mut file = File::open(key_file_path)?;
     let mut priv_key_buf = String::new();
@@ -144,7 +145,7 @@ pub fn encrypt_data_with_private_key(key_name: &str, username: &str, password: &
     let private_key = RSAPrivateKey::from_pkcs1(&der_bytes).expect("failed to parse key");
     let pub_key = RSAPublicKey::from(&private_key);
 
-    let enc_data = pub_key.encrypt(&mut rng, PaddingScheme::new_pkcs1v15(), username.as_bytes()).expect("failed to encrypt");
+    let enc_data = pub_key.encrypt(&mut rng, PaddingScheme::new_pkcs1v15_encrypt(), username.as_bytes()).expect("failed to encrypt");
 
     //Write encrypted data to store file
     let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), store_name);
