@@ -40,7 +40,7 @@ fn main() {
     // Get all command line args
     let matches = App::new("Password Manager")
         .version("1.0")
-        .author("Haohan Jiang <jiang4.pdx.edu>, Taraq Jallad <email>")
+        .author("Haohan Jiang <jiang4.pdx.edu>, Taraq Jallad <tajallad@pdx.edu>")
         .about("Usage: \n\
         To initialize a new store: password_manager <NAME> init\n\
         To add a secret to the store: password_manger <NAME> create\n")
