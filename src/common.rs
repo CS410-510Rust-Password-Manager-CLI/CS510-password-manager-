@@ -45,6 +45,8 @@ pub enum UserMessage<'a>{
     CreatedBaseDir,
     // Inform user that store directory has been created
     CreatedStoreDir,
+    // Inform user that new entry has been successfully saved into the manager
+    CreatedEntrySuccessfully,
 }
 
 impl UserMessage<'_>{
@@ -59,6 +61,7 @@ impl UserMessage<'_>{
             UserMessage::StoreCreationSuccessful => "Store created successfully!".to_string(),
             UserMessage::CreatedBaseDir => "Base dir created!".to_string(),
             UserMessage::CreatedStoreDir => "Base store dir created!".to_string(),
+            UserMessage::CreatedEntrySuccessfully => "Entry created successfully!".to_string(),
         }
     }
 }

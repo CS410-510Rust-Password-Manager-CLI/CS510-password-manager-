@@ -12,7 +12,7 @@ use crate::common::{GlobalConfiguration, UserMessage};
 
 // Hashes store name and checks if the store name the user input can be created
 pub fn does_store_exist(store_name: &str) -> bool{
-    let store_hash = super::common::calculate_store_name_hash(store_name);
+    let store_hash = common::calculate_store_name_hash(store_name);
     let store_base_path = GlobalConfiguration::StoreDir.value().unwrap();
     let store_path: &str = &format!("{0}/{1}.json", store_base_path, store_hash);
     return Path::new(store_path).exists()
@@ -69,13 +69,14 @@ pub fn setup(store_name: &str) -> errors::Result<()>{
 
     // Return error if this store name already exists
     if does_store_exist(store_name) {
-        return Err(super::errors::PasswordStoreError::PasswordStoreExists(store_name))
+        return Err(errors::PasswordStoreError::PasswordStoreExists(store_name))
     }
 
     //creating path for new file
     let base_store_path = common::GlobalConfiguration::StoreDir.value().unwrap();
-    let store_hash = super::common::calculate_store_name_hash(store_name);
+    let store_hash = common::calculate_store_name_hash(store_name);
     let new_store_path = format!("{0}/{1}.json", base_store_path, store_hash);
+
     File::create(new_store_path);
     Ok(())
 }

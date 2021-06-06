@@ -1,4 +1,6 @@
 struct entry{
-    username: String,
-    password: String
+    name: String,
+    username: String, //encrypted
+    password: String, //encrypted
+    hint: String
 }

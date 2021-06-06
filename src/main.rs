@@ -1,12 +1,15 @@
-use crate::common::{GlobalConfiguration, UserMessage};
-use clap::{AppSettings, Clap, App, Arg, Subcommand};
+use clap::{App, AppSettings, Arg, Clap, Subcommand};
 
-mod init;
+use crate::common::{GlobalConfiguration, UserMessage};
+
+mod operations{
+    pub mod init;
+    pub mod create;
+    pub mod delete;
+    pub mod get;
+}
 mod common;
 mod errors;
-mod create;
-mod get;
-mod delete;
 
 extern crate home;
 
@@ -62,12 +65,18 @@ fn main() {
     if let Some(op) = matches.value_of("op"){
         match op{
             "init" => {
-                match init::setup(store_name){
-                    Ok(()) => println!("{}", UserMessage::StoreCreationSuccessful.value()),
-                    Err(e) => println!("{}", e),
+                if let Err(e) = operations::init::setup(store_name){
+                    println!("{}", e);
+                    std::process::exit(1);
                 }
             },
-            "create" => println!("create!"),
+            "create" => {
+                println!("Create");
+                if let Err(e) = operations::create::create_menu(){
+                    println!("{}", e);
+                    std::process::exit(1);
+                }
+            },
             "get" => println!("get"),
             "modify" => println!("modify!"),
             _ => println!("Must enter a valid operation")
