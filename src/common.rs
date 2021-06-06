@@ -2,6 +2,8 @@ extern crate home;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
+use std::io::{self, Write};
+use rpassword::read_password;
 
 // Global Configurations for the password manager
 pub enum GlobalConfiguration{
@@ -69,10 +71,27 @@ pub fn calculate_store_name_hash<T: Hash + ?Sized>(t: &T) -> u64 {
     s.finish()
 }
 
+// Check if the base dir exists
 pub fn base_dir_exist() -> bool{
     match GlobalConfiguration::HomeDir.value(){
         Ok(path) => Path::new(&path).is_dir(),
         Err(e) => false
     }
+}
+
+// Check if the store dir exists
+pub fn store_dir_exist() -> bool{
+    match GlobalConfiguration::StoreDir.value(){
+        Ok(path) => Path::new(&path).is_dir(),
+        Err(e) => false
+    }
+}
+
+// Gets user password without revealing it on the command line
+fn get_password() {
+    print!("Password: ");
+    std::io::stdout().flush().unwrap();
+    let password = read_password().unwrap();
+    println!("The password is: {}", password);
 }
 

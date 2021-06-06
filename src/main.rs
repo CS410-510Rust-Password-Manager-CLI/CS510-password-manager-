@@ -1,35 +1,15 @@
-use chrono::prelude::*;
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
-use rpassword::read_password;
-use std::fs::{create_dir_all, read_dir, write};
-use std::io::{self, Write};
-use std::path::{Path, PathBuf};
 use crate::common::{GlobalConfiguration, UserMessage};
+use clap::{AppSettings, Clap, App, Arg, Subcommand};
 
 mod init;
 mod common;
 mod errors;
 mod create;
+mod get;
+mod delete;
 
 extern crate home;
 
-struct FileData {
-    id: String,
-    pass: String,
-    date: String,
-}
-
-///generates a random alphanumeric string, with a length of the passed in integer
-/// random character code from: (https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html)
-fn genpass(length: u32) -> String {
-    let rand_string: String = thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(length as usize)
-        .map(char::from)
-        .collect();
-    rand_string
-}
 
 /*
 have a config file located at ~/.passstore/.config
@@ -53,158 +33,47 @@ have a config file located at ~/.passstore/.config
 
  */
 
-/*
-fn menu() {
-    let mut again = true; //loop control
-    let mut buffer = String::new(); //store user input
-    let mut selection: u32;
-    while again {
-        println!("\n*PASSWORD MANAGER CLI*\n");
-        println!("1. generate new password");
-        println!("9. exit\n");
-        print!("Selection: ");
-        io::stdout().flush().unwrap();
-
-        //read user input
-        io::stdin()
-            .read_line(&mut buffer)
-            .expect("could not read input");
-
-        //parse user input to u32
-        selection = buffer
-            .trim()
-            .parse()
-            .expect("invalid user input, expecting integer");
-        buffer.clear();
-
-        let length: u32 = 20;
-        match selection {
-            1 => {
-                let password = genpass(length);
-                println!("\nGenerated password: {}", password);
-                println!("Date generated: {}", Utc::now().date().naive_utc());
-            }
-            9 => {
-                again = false;
-            }
-            _ => {
-                println!("\n~Invalid input~")
-            }
-        }
-    }
-}
-*/
-
-///Traverse to the home directory and checks for a .passmanager folder. If found, it will display the filenames of all files in the folder
-fn get_stores() {
-    let hdir = home::home_dir();
-    match hdir {
-        Some(path) => {
-            let mut hdirfinal = path.display().to_string();
-            hdirfinal.push_str("/.passmanager");
-            let testfiles = read_dir(&hdirfinal);
-            match testfiles {
-                Ok(_v) => (),
-                Err(_e) => {
-                    println!("Error: the base path does not exist or the process lacks permissions to view the contents");
-                    return;
-                }
-            }
-
-            let files = read_dir(&hdirfinal).unwrap();
-
-            //print names of all files in the base directory
-            for file in files {
-                println!("Filename: {:?}", file.unwrap().file_name())
-            }
-            //TODO: Crawl through password dir and print all store names
-            //TODO: Maybe store names should be encrypted as well?
-            //TODO: Decrypt store names and print to screen
-        }
-        None => {
-            println!("Impossible to get your home dir!");
-        }
-    }
-}
-
-
-fn file_data() -> FileData {
-    let mut buffer = String::new();
-    print!("\nEnter name associated with data: ");
-    io::stdout().flush().unwrap();
-
-    //read user input
-    io::stdin()
-        .read_line(&mut buffer)
-        .expect("could not read input");
-
-    buffer.trim();
-
-    let name: String;
-    name = buffer;
-
-    let data = FileData {
-        pass: genpass(20),
-        id: name,
-        date: Utc::now().date().naive_utc().to_string(),
-    };
-    return data;
-}
-
-// Gets user password without revealing it on the command line
-fn get_password() {
-    print!("Password: ");
-    std::io::stdout().flush().unwrap();
-    let password = read_password().unwrap();
-    println!("The password is: {}", password);
-}
-
 fn main() {
     // Get all command line args
-    let args: Vec<String> = std::env::args().collect();
+    let matches = App::new("Password Manager")
+        .version("1.0")
+        .author("Haohan Jiang <jiang4.pdx.edu>, Taraq Jallad <email>")
+        .about("Usage: \n\
+        To initialize a new store: password_manager <NAME> init\n\
+        To add a secret to the store: password_manger <NAME> create\n")
+        .arg(
+            Arg::new("store_name")
+                .short('s')
+                .long("store_name")
+                .value_name("NAME")
+                .about("Store name for operation<op>.")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::new("op")
+                .long("op")
+                .value_name("OPERATION")
+                .about("Action to perform on the password store. Available: init, create, get, delete")
+                .takes_value(true),
+        )
+        .get_matches();
 
-    //TODO: Create config file
-    // Create master key and secret key
-    //
-
-    //TODO: Before we can give user access to stores and functions user must enter password
-    // Password gives user a set of credentials to unlock stores
-    // Creds will last a certain amount of time before a user must reauthenicate
-
-    // List all password stores
-    // TODO: Potentially remove
-    if args.len() == 1 {
-        // Check if configuration store exists.
-        // Do we really need configuration store?
-        println!("Getting all password stores!");
-        // If store names are hashed, we cant get the store names
-        //get_stores();
-        let h = GlobalConfiguration::HomeDir.value().unwrap();
-        println!("{}", h);
-        let s = GlobalConfiguration::StoreDir.value().unwrap();
-        println!("{}", s);
-        return;
-    }
-
-    // Parse all other args
-    match args[1].as_str() {
-        "init" => {
-            // TODO: Catch the panic here and just print message
-            let store_name = args
-                .get(2)
-                .expect("Did not get store name for option 'Init'");
-            println!("{}", UserMessage::CreatingNewStore(store_name).value());
-            match init::setup(store_name){
-                Ok(()) => println!("{}", UserMessage::StoreCreationSuccessful.value()),
-                Err(e) => println!("{}", e),
-            }
+    let store_name= matches.value_of("store_name").unwrap();
+    if let Some(op) = matches.value_of("op"){
+        match op{
+            "init" => {
+                match init::setup(store_name){
+                    Ok(()) => println!("{}", UserMessage::StoreCreationSuccessful.value()),
+                    Err(e) => println!("{}", e),
+                }
+            },
+            "create" => println!("create!"),
+            "get" => println!("get"),
+            "modify" => println!("modify!"),
+            _ => println!("Must enter a valid operation")
         }
-        "create" => {
-            println!("Created new password");
-            create::create(args[2].as_str());
-        }
-        _ => {
-            println!("Unknown arg: {}", args[1])
-        }
+    }else{
+        println!("Must enter an operation");
+        return
     }
 }

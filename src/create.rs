@@ -1,4 +1,10 @@
-///Uses the user passed store name to create a file in the .passmanager folder. The file will contain a generated password, date created and user entered name.
+use chrono::prelude::*;
+use std::path::{Path, PathBuf};
+use std::io::{self, Write};
+use std::fs::{create_dir_all, read_dir, write};
+use rand::{thread_rng, Rng};
+use rand::distributions::Alphanumeric;
+//Uses the user passed store name to create a file in the .passmanager folder. The file will contain a generated password, date created and user entered name.
 
 // Create function:
 //  hash store name
@@ -6,6 +12,17 @@
 //  get user and password from command line
 //  encrypt secrets
 //  append to file with new user/password
+
+///generates a random alphanumeric string, with a length of the passed in integer
+/// random character code from: (https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html)
+fn genpass(length: u32) -> String {
+    let rand_string: String = thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(length as usize)
+        .map(char::from)
+        .collect();
+    rand_string
+}
 
 pub fn create(store_name: &str) {
     //Need a store name and then add secrets to that store
@@ -50,17 +67,17 @@ pub fn create(store_name: &str) {
             let file_data = file_data();
 
             //create string to store in file
-            let mut text: String;
+            let mut text = "test";
 
-            text.push_str("id: ");
-            text.push_str(&file_data.id);
-            text.push_str("\n");
-            text.push_str("secret: ");
-            text.push_str(&file_data.pass);
-            text.push_str("\n");
-            text.push_str("date: ");
-            text.push_str(&file_data.date);
-            text.push_str("\n");
+            // text.push_str("id: ");
+            // text.push_str(&file_data.id);
+            // text.push_str("\n");
+            // text.push_str("secret: ");
+            // text.push_str(&file_data.pass);
+            // text.push_str("\n");
+            // text.push_str("date: ");
+            // text.push_str(&file_data.date);
+            // text.push_str("\n");
 
             let written = write(path, text);
             match written {
@@ -73,4 +90,33 @@ pub fn create(store_name: &str) {
             return;
         }
     }
+}
+
+struct FileData {
+    id: String,
+    pass: String,
+    date: String,
+}
+
+fn file_data() -> FileData {
+    let mut buffer = String::new();
+    print!("\nEnter name associated with data: ");
+    io::stdout().flush().unwrap();
+
+    //read user input
+    io::stdin()
+        .read_line(&mut buffer)
+        .expect("could not read input");
+
+    buffer.trim();
+
+    let name: String;
+    name = buffer;
+
+    let data = FileData {
+        pass: genpass(20),
+        id: name,
+        date: Utc::now().date().naive_utc().to_string(),
+    };
+    return data;
 }

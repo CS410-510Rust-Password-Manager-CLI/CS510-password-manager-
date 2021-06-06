@@ -44,17 +44,20 @@ fn setup_store_dirs() -> errors::Result<'static, ()>{
     }
 }
 
+// Initialization for a new password store
 pub fn setup(store_name: &str) -> errors::Result<()>{
-    // Check if .passwordmanager dir exists
     // Setup base dirs if they do not exist
-    if !common::base_dir_exist(){
-        match setup_base_dirs(){
+    if !common::base_dir_exist() {
+        match setup_base_dirs() {
             Ok(()) => {
                 println!("{}", UserMessage::CreatedBaseDir.value());
                 Ok(())
             },
             Err(e) => Err(e),
         };
+    }
+    // Setup store dirs if they do not exist
+    if !common::store_dir_exist(){
         match setup_store_dirs(){
             Ok(()) => {
                 println!("{}", UserMessage::CreatedStoreDir.value());
