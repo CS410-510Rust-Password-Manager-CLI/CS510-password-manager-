@@ -1,121 +1,78 @@
 extern crate home;
-extern crate keyring;
 extern crate std;
 
-use rpassword::read_password;
-use std::error::Error;
-use std::fs::{create_dir_all, write, DirEntry, self};
-use std::io::{self, Read, Write};
-use std::path::{Path, PathBuf};
-use text_io::read;
+use std::fs::{create_dir_all};
+use std::path::{Path};
+use std::fs::File;
 
 // Internal library
-use common;
-use errors;
+use crate::common;
+use crate::errors;
+use crate::common::{GlobalConfiguration, UserMessage};
 
-
-/*
-   Set a global password for the password store
-*/
-// pub fn set_global_password() -> Result<(), Box<dyn Error>> {
-//     let service = "password_store_cli";
-//
-//     print!("Username: ");
-//     std::io::stdout().flush().unwrap();
-//     let username: String = read!("{}\n");
-//     println!("The username is: {}", username);
-//
-//     let kr = keyring::Keyring::new(&service, &username);
-//
-//     print!("Password: ");
-//     std::io::stdout().flush().unwrap();
-//     let password = read_password().unwrap();
-//
-//     kr.set_password(&password)?;
-//
-//     Ok(())
-// }
-//
-// pub fn get_password() -> Result<(), Box<dyn Error>> {
-//     let service = "password_store_cli";
-//
-//     print!("Username: ");
-//     std::io::stdout().flush().unwrap();
-//     let username: String = read!("{}\n");
-//     println!("The username is: {}", username);
-//
-//     let keyring = keyring::Keyring::new(&service, &username);
-//
-//     let password = keyring.get_password()?;
-//     println!("The password is '{}'", password);
-//
-//     Ok(())
-// }
-
-/*
-    Hashes store name and checks if the store name the user input can be created
- */
+// Hashes store name and checks if the store name the user input can be created
 pub fn does_store_exist(store_name: &str) -> bool{
     let store_hash = super::common::calculate_store_name_hash(store_name);
-    let store_path: &str = &format!("~/.passwordmanager/.store/{}.json", store_hash);
+    let store_base_path = GlobalConfiguration::StoreDir.value().unwrap();
+    let store_path: &str = &format!("{0}/{1}.json", store_base_path, store_hash);
     return Path::new(store_path).exists()
 }
 
-pub fn init(store_name: &str) -> super::errors::Result<()>{
-    // Check if store exists
-    // If store exists, return error: this store exists
-    // If not create a new store by name
-    if does_store_exist(store_name){
-        return Err(super::errors::PasswordStoreError::PasswordStoreExists(store_name))
+// Sets up base dir if they do not exist
+// Returns an error if the dir cannot be created
+fn setup_base_dirs() -> errors::Result<'static, ()>{
+    let base_path = GlobalConfiguration::HomeDir.value().unwrap();
+    match create_dir_all(&base_path){
+        Ok(()) =>
+            {
+                Ok(())
+            },
+        Err(e) => Err(errors::PasswordStoreError::ErrorCreatingBasePath)
     }
-    setup(store_name);
-    Ok(())
 }
 
-
-/*
-
-*/
-pub fn setup(store_name: &str) {
-    // Check if .passwordmanager dir exists
-    // check if a homedir env variable exits
-    let hdir = home::home_dir();
-    match hdir {
-        Some(path) => {
-            //a home env variable exists
-            println!("Found home dir: {}", path.display());
-            let mut hdirfinal = path.display().to_string();
-            hdirfinal.push_str("/.passmanager");
-
-            if !Path::new(&hdirfinal).is_dir() {
-                // Create dir if path doesn't exist
-                println!("Base path does not exist!");
-                let created = create_dir_all(&hdirfinal);
-                match created {
-                    Ok(()) => println!("New base path created"),
-                    Err(e) => println!("Error creating new path: {}", e),
-                }
-            }
-
-            //creating path for new file
-            let mut pathfilestring: String = "".to_owned();
-            pathfilestring.push_str(&hdirfinal);
-            pathfilestring.push('/');
-            pathfilestring.push_str(store_name);
-            pathfilestring.push_str(".txt");
-
-            //write to file
-            let mut path = PathBuf::new();
-            path.push(pathfilestring);
-            let written = write(path, "test");
-            match written {
-                Ok(()) => println!("Successfully written to file"),
-                Err(e) => println!("Unable to write to file: {}", e),
-            }
-        }
-        None => {
-            println!("Impossible to get your home dir!");
-            return;
-        }
+// Sets up store dir if they do not exist
+// Returns an error if the dir cannot be created
+fn setup_store_dirs() -> errors::Result<'static, ()>{
+    let base_path = GlobalConfiguration::StoreDir.value().unwrap();
+    match create_dir_all(&base_path){
+        Ok(()) =>
+            {
+                Ok(())
+            },
+        Err(e) => Err(errors::PasswordStoreError::ErrorCreatingStorePath)
     }
+}
+
+pub fn setup(store_name: &str) -> errors::Result<()>{
+    // Check if .passwordmanager dir exists
+    // Setup base dirs if they do not exist
+    if !common::base_dir_exist(){
+        match setup_base_dirs(){
+            Ok(()) => {
+                println!("{}", UserMessage::CreatedBaseDir.value());
+                Ok(())
+            },
+            Err(e) => Err(e),
+        };
+        match setup_store_dirs(){
+            Ok(()) => {
+                println!("{}", UserMessage::CreatedStoreDir.value());
+                Ok(())
+            },
+            Err(e) => Err(e),
+        };
+    }
+
+    // Return error if this store name already exists
+    if does_store_exist(store_name) {
+        return Err(super::errors::PasswordStoreError::PasswordStoreExists(store_name))
+    }
+
+    //creating path for new file
+    let base_store_path = common::GlobalConfiguration::StoreDir.value().unwrap();
+    let store_hash = super::common::calculate_store_name_hash(store_name);
+    let new_store_path = format!("{0}/{1}.json", base_store_path, store_hash);
+    File::create(new_store_path);
+    Ok(())
 }

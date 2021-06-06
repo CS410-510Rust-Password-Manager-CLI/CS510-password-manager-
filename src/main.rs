@@ -5,9 +5,12 @@ use rpassword::read_password;
 use std::fs::{create_dir_all, read_dir, write};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
+use crate::common::{GlobalConfiguration, UserMessage};
 
 mod init;
 mod common;
+mod errors;
+mod create;
 
 extern crate home;
 
@@ -124,74 +127,6 @@ fn get_stores() {
     }
 }
 
-///Uses the user passed store name to create a file in the .passmanager folder. The file will contain a generated password, date created and user entered name.
-fn create(store_name: &str) {
-    //Need a store name and then add secrets to that store
-    //This can use the CLI Menu format that we had in the menu function
-    //Can add option to allow auto generation of secrets or to allow a user to use their own
-    let hdir = home::home_dir();
-    match hdir {
-        Some(path) => {
-            let mut hdirfinal = path.display().to_string();
-            hdirfinal.push_str("/.passmanager");
-
-            if !Path::new(&hdirfinal).is_dir() {
-                // Create dir if path doesn't exist
-                println!("Base path does not exist!");
-                let created = create_dir_all(&hdirfinal);
-                match created {
-                    Ok(()) => println!("New base path created"),
-                    Err(e) => println!("Error creating new path: {}", e),
-                }
-            }
-
-            let files = read_dir(&hdirfinal).unwrap();
-            for file in files {
-                if file.unwrap().file_name() == store_name {
-                    println!("Store name already exists");
-                    return;
-                }
-            }
-
-            //store name does not already exist
-            //creating path for new file
-            let mut pathfilestring: String = "".to_owned();
-            pathfilestring.push_str(&hdirfinal);
-            pathfilestring.push('/');
-            pathfilestring.push_str(store_name);
-            pathfilestring.push_str(".txt");
-
-            let mut passfile = PathBuf::new();
-            passfile.push(pathfilestring);
-
-            //get data for the store
-            let file_data = file_data();
-
-            //create string to store in file
-            let mut text: String;
-
-            text.push_str("id: ");
-            text.push_str(&file_data.id);
-            text.push_str("\n");
-            text.push_str("secret: ");
-            text.push_str(&file_data.pass);
-            text.push_str("\n");
-            text.push_str("date: ");
-            text.push_str(&file_data.date);
-            text.push_str("\n");
-
-            let written = write(path, text);
-            match written {
-                Ok(()) => println!("Successfully written to file"),
-                Err(e) => println!("Unable to write to file: {}", e),
-            }
-        }
-        None => {
-            println!("Impossible to get your home dir!");
-            return;
-        }
-    }
-}
 
 fn file_data() -> FileData {
     let mut buffer = String::new();
@@ -216,22 +151,12 @@ fn file_data() -> FileData {
     return data;
 }
 
-fn authenticate() {
-    todo!()
-}
-
 // Gets user password without revealing it on the command line
 fn get_password() {
     print!("Password: ");
     std::io::stdout().flush().unwrap();
     let password = read_password().unwrap();
     println!("The password is: {}", password);
-}
-
-fn first_boot() {
-    // Setup password for general operation of CLI
-
-    // Encrypt that password
 }
 
 fn main() {
@@ -246,32 +171,18 @@ fn main() {
     // Password gives user a set of credentials to unlock stores
     // Creds will last a certain amount of time before a user must reauthenicate
 
-    //TODO: Require password entry
-
-    let error = init::set_global_password();
-    match error {
-        Ok(_) => println!("The password is:"),
-        Err(e) => println!("error: {}", e),
-    };
-
-    let error = init::get_password();
-    match error {
-        Ok(_) => println!("The password is:"),
-        Err(e) => println!("error: {}", e),
-    };
-
-    //get_password();
-
-    // let auth = GoogleAuthenticator::new().copy();
-    // let secret = "I3VFM3JKMNDJCDH5BMBEEQAW6KJ6NOE3";
-    // setup(auth);
-    // check_secret(auth);
-
     // List all password stores
     // TODO: Potentially remove
     if args.len() == 1 {
+        // Check if configuration store exists.
+        // Do we really need configuration store?
         println!("Getting all password stores!");
-        get_stores();
+        // If store names are hashed, we cant get the store names
+        //get_stores();
+        let h = GlobalConfiguration::HomeDir.value().unwrap();
+        println!("{}", h);
+        let s = GlobalConfiguration::StoreDir.value().unwrap();
+        println!("{}", s);
         return;
     }
 
@@ -282,12 +193,15 @@ fn main() {
             let store_name = args
                 .get(2)
                 .expect("Did not get store name for option 'Init'");
-            println!("Init new password store: {}", store_name);
-            //init::init(store_name);
+            println!("{}", UserMessage::CreatingNewStore(store_name).value());
+            match init::setup(store_name){
+                Ok(()) => println!("{}", UserMessage::StoreCreationSuccessful.value()),
+                Err(e) => println!("{}", e),
+            }
         }
         "create" => {
             println!("Created new password");
-            create(args[2].as_str());
+            create::create(args[2].as_str());
         }
         _ => {
             println!("Unknown arg: {}", args[1])
