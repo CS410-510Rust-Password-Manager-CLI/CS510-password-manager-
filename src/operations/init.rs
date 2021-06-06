@@ -44,6 +44,20 @@ fn setup_store_dirs() -> errors::Result<'static, ()>{
     }
 }
 
+// Sets up key store dir if they do not exist
+// Returns an error if the dir cannot be created
+fn setup_key_store_dirs() -> errors::Result<'static, ()>{
+    let base_path = GlobalConfiguration::KeyStoreDir.value().unwrap();
+    match create_dir_all(&base_path){
+        Ok(()) =>
+            {
+                Ok(())
+            },
+        Err(e) => Err(errors::PasswordStoreError::ErrorCreatingStorePath)
+    }
+}
+
+
 // Initialization for a new password store
 pub fn setup(store_name: &str) -> errors::Result<()>{
     // Setup base dirs if they do not exist
@@ -67,6 +81,15 @@ pub fn setup(store_name: &str) -> errors::Result<()>{
         };
     }
 
+    if !common::key_store_dir_exist(){
+        match setup_key_store_dirs(){
+            Ok(()) => {
+                println!("{}", UserMessage::CreatedStoreDir.value());
+                Ok(())
+            },
+            Err(e) => Err(e),
+        };
+    }
     // Return error if this store name already exists
     if does_store_exist(store_name) {
         return Err(errors::PasswordStoreError::PasswordStoreExists(store_name))

@@ -14,17 +14,28 @@ use crate::errors;
 //Uses the user passed store name to create a file in the .passmanager folder.
 // The file will contain a generated password, date created and user entered name.
 
-pub fn create_menu() -> errors::Result<'static, ()>{
+// Gather user info for new data entry
+pub fn create_menu(store_name: &str) -> errors::Result<'static, ()>{
     let entry_name: String = *get_entry_name();
     let username: String = *get_username();
     match get_password(){
         Ok(b) => {
             let password: String = *b;
+            let key_name = common::calculate_store_name_hash(&entry_name).to_string();
             println!("The Entry name is: {}", entry_name);
             println!("The user name is: {}", username);
             println!("Pass: {}", password);
+            match common::create_new_rsa_private_key(&key_name){
+                Ok(()) => {
+                    // Once the key is successfully written, read the key and generate a pub key
+                    // to encrypt and save to file
+                    let hashed_store_name = common::calculate_store_name_hash(store_name).to_string();
+                    common::encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name);
 
-            Ok(())
+                    Ok(())
+                },
+                Err(e) => Err(errors::PasswordStoreError::ErrorPrivateKeyGeneration),
+            }
         },
         Err(e) => Err(e),
     }
