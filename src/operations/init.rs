@@ -84,7 +84,7 @@ pub fn setup(store_name: &str) -> errors::Result<()>{
     if !common::key_store_dir_exist(){
         match setup_key_store_dirs(){
             Ok(()) => {
-                println!("{}", UserMessage::CreatedStoreDir.value());
+                println!("{}", UserMessage::CreatedKeyStoreDir.value());
                 Ok(())
             },
             Err(e) => Err(e),
