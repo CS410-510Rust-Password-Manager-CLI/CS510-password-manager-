@@ -26,7 +26,6 @@ pub fn delete_secret_store(store_name: &str) -> errors::Result<'static, ()>{
     //get file path of hashed store name
     let file_path = format!("{}/{}.json", GlobalConfiguration::StoreDir.value().unwrap(), hash_store_name);
 
-
     //verify store name
     let mut buffer = String::new();
     print!("\nEnter storename again to verify: ");

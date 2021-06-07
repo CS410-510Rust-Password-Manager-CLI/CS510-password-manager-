@@ -44,7 +44,8 @@ fn main() {
         .about(
             "Usage: \n\
         To initialize a new store: password_manager <NAME> init\n\
-        To add a secret to the store: password_manger <NAME> create\n",
+        To delete a secret from the store: password_manager <NAME> delete\n\
+        To add a secret to the store: password_manager <NAME> create\n",
         )
         .arg(
             Arg::new("store_name")
@@ -77,6 +78,12 @@ fn main() {
             "create" => {
                 println!("Create");
                 if let Err(e) = operations::create::create_menu(store_name) {
+                    println!("{}", e);
+                    std::process::exit(1);
+                }
+            }
+            "delete" => {
+                if let Err(e) = operations::delete::delete_secret_store(store_name) {
                     println!("{}", e);
                     std::process::exit(1);
                 }
