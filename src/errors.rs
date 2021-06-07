@@ -21,6 +21,12 @@ pub enum PasswordStoreError<'a> {
     ErrorPrivateKeyGeneration,
     #[error("Could not encrypt data")]
     ErrorDataEncryption,
+    #[error("Store directory does not exist")]
+    ErrorStoreDir,
+    #[error("Store does not exist")]
+    ErrorStoreExist,
+    #[error("Entered store names do not match! Store names must match to delete an entry")]
+    ErrorMisMatchStoreName,
 }
 
 pub type Result<'a, T> = std::result::Result<T, PasswordStoreError<'a>>;
