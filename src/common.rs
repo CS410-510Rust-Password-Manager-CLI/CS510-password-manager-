@@ -8,9 +8,11 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::str;
 use base64;
+use std::io::{Write, BufReader};
 
 use crate::errors;
 use crate::data_model;
+use crate::data_model::EntryStore;
 
 // Global Configurations for the password manager
 pub enum GlobalConfiguration{
@@ -128,12 +130,14 @@ pub fn create_new_rsa_private_key(key_name: &str) -> std::io::Result<()>{
     Ok(())
 }
 
-pub fn encrypt_data_with_private_key(key_name: &str, username: &str, password: &str, store_name: &str, entry_name: &str) {
+pub fn encrypt_data_with_private_key(key_name: &str, username: &str, password: &str, hashed_store_name: &str, entry_name: &str)
+    -> std::io::Result<()> {
     let key_file_path = format!("{}/{}.pem", GlobalConfiguration::KeyStoreDir.value().unwrap(), key_name);
     let mut file = File::open(key_file_path).unwrap();
     let mut priv_key_buf = String::new();
-    file.read_to_string(&mut priv_key_buf);
 
+    // Sourced from crate example
+    file.read_to_string(&mut priv_key_buf);
     let der_encoded = priv_key_buf
         .lines()
         .filter(|line| !line.starts_with("-"))
@@ -143,28 +147,57 @@ pub fn encrypt_data_with_private_key(key_name: &str, username: &str, password: &
         });
     let der_bytes = base64::decode(&der_encoded).expect("failed to decode base64 content");
     let private_key = RSAPrivateKey::from_pkcs1(&der_bytes).expect("failed to parse key");
+
+    // Create public key from key store private key
     let pub_key = RSAPublicKey::from(&private_key);
 
+    // Encrypt password and username
     let mut rng = OsRng;
-    let enc_username_data = pub_key.encrypt(&mut rng, PaddingScheme::new_pkcs1v15_encrypt(), username.as_bytes()).expect("failed to encrypt username");
-    let enc_password_data = pub_key.encrypt(&mut rng, PaddingScheme::new_pkcs1v15_encrypt(), password.as_bytes()).expect("failed to encrypt password");
-    let enc_data = pub_key.encrypt(&mut rng, PaddingScheme::new_pkcs1v15_encrypt(), username.as_bytes()).expect("failed to encrypt");
+    let enc_username_data = pub_key.encrypt(&mut rng, PaddingScheme::PKCS1v15Encrypt, username.as_bytes()).expect("failed to encrypt username");
+    let enc_password_data = pub_key.encrypt(&mut rng, PaddingScheme::PKCS1v15Encrypt, password.as_bytes()).expect("failed to encrypt password");
+
+    // let store_path = Path::new(&format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), hashed_store_name));
+    // let file = File::open(store_path)?;
+    // let reader = BufReader::new(file)?;
+    // let entries: EntryStore = serde_json::from_reader(reader)?;
+
+
+    // Create new data entry from encrypted data
+    let new_entry = data_model::Entry{
+        name: entry_name.to_string(),
+        username: enc_username_data,
+        password: enc_password_data,
+    };
+
+    let serialized_data = serde_json::to_string(&new_entry).unwrap();
+    let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), hashed_store_name);
+    println!("Path: {}", store_path);
+    println!("Data: {}", serialized_data);
+    let mut store_file = File::open(Path::new(&store_path));
+    // serde_json::to_writer(store_file.unwrap(), &new_entry).unwrap();
+    // let serialized_data = serde_json::to_string(&new_entry).unwrap();
+    // println!("serialized = {}", serialized_data);
+
+    //println!("{}", str::from_utf8(&enc_username_data).unwrap());
+
+
 
     //Write encrypted data to store file
-    let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), store_name);
-    let mut store_file = File::open(store_path);
-
-    println!("{}", str::from_utf8(&enc_username_data).unwrap());
-
-    //Write encrypted data to store file
-    // let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), store_name);
-    // let mut store_file = File::open(store_path)?;
+    // let store_path = format!("{0}/{1}.txt", GlobalConfiguration::StoreDir.value().unwrap(), store_name);
+    // let mut store_file = File::create(store_path)?;
+    // store_file.write_all(&enc_username_data)?;
     //
-    // let new_entry = data_model::Entry{
+    // let store_path = format!("{0}/{1}.txt", GlobalConfiguration::StoreDir.value().unwrap(), store_name);
+    // let mut store_data = std::fs::read(&store_path).unwrap();
+    // let dec_data = private_key.decrypt(PaddingScheme::PKCS1v15Encrypt, &store_data).expect("failed to decrypt");
+    // println!("{}", str::from_utf8(&dec_data).unwrap());
+
+    //let new_entry = data_model::Entry{
     //     name: entry_name.to_string(),
     //
     // }
 
-    //Ok()
+
+    Ok(())
 }
 

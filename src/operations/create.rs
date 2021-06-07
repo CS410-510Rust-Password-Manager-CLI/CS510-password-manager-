@@ -31,8 +31,13 @@ pub fn create_menu(store_name: &str) -> errors::Result<'static, ()>{
                     // Once the key is successfully written, read the key and generate a pub key
                     // to encrypt and save to file
                     let hashed_store_name = common::calculate_store_name_hash(store_name).to_string();
-                    common::encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name, &entry_name);
-                    Ok(())
+                    match common::encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name, &entry_name){
+                        Ok(()) => Ok(()),
+                        Err(e) => {
+                            println!("{}", e.to_string());
+                            Ok(())
+                        }
+                    }
                     // match common::encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name){
                     //     Ok(data_box) => {
                     //         let encrypted_username = &*(data_box.0);
@@ -103,108 +108,40 @@ pub fn get_hint(){
 
 ///generates a random alphanumeric string, with a length of the passed in integer
 /// random character code from: (https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html)
-fn genpass(length: u32) -> String {
-    let rand_string: String = thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(length as usize)
-        .map(char::from)
-        .collect();
-    rand_string
-}
-
-// pub fn create(store_name: &str) {
-//     //Need a store name and then add secrets to that store
-//     //This can use the CLI Menu format that we had in the menu function
-//     //Can add option to allow auto generation of secrets or to allow a user to use their own
-//     let hdir = home::home_dir();
-//     match hdir {
-//         Some(path) => {
-//             let mut hdirfinal = path.display().to_string();
-//             hdirfinal.push_str("/.passmanager");
-//
-//             if !Path::new(&hdirfinal).is_dir() {
-//                 // Create dir if path doesn't exist
-//                 println!("Base path does not exist!");
-//                 let created = create_dir_all(&hdirfinal);
-//                 match created {
-//                     Ok(()) => println!("New base path created"),
-//                     Err(e) => println!("Error creating new path: {}", e),
-//                 }
-//             }
-//
-//             let files = read_dir(&hdirfinal).unwrap();
-//             for file in files {
-//                 if file.unwrap().file_name() == store_name {
-//                     println!("Store name already exists");
-//                     return;
-//                 }
-//             }
-//
-//             //store name does not already exist
-//             //creating path for new file
-//             let mut pathfilestring: String = "".to_owned();
-//             pathfilestring.push_str(&hdirfinal);
-//             pathfilestring.push('/');
-//             pathfilestring.push_str(store_name);
-//             pathfilestring.push_str(".txt");
-//
-//             let mut passfile = PathBuf::new();
-//             passfile.push(pathfilestring);
-//
-//             //get data for the store
-//             let file_data = file_data();
-//
-//             //create string to store in file
-//             let mut text = "test";
-//
-//             // text.push_str("id: ");
-//             // text.push_str(&file_data.id);
-//             // text.push_str("\n");
-//             // text.push_str("secret: ");
-//             // text.push_str(&file_data.pass);
-//             // text.push_str("\n");
-//             // text.push_str("date: ");
-//             // text.push_str(&file_data.date);
-//             // text.push_str("\n");
-//
-//             let written = write(path, text);
-//             match written {
-//                 Ok(()) => println!("Successfully written to file"),
-//                 Err(e) => println!("Unable to write to file: {}", e),
-//             }
-//         }
-//         None => {
-//             println!("Impossible to get your home dir!");
-//             return;
-//         }
-//     }
+// fn genpass(length: u32) -> String {
+//     let rand_string: String = thread_rng()
+//         .sample_iter(&Alphanumeric)
+//         .take(length as usize)
+//         .map(char::from)
+//         .collect();
+//     rand_string
 // }
 
-struct FileData {
-    id: String,
-    pass: String,
-    date: String,
-}
-
-fn file_data() -> FileData {
-    let mut buffer = String::new();
-    print!("\nEnter name associated with data: ");
-    io::stdout().flush().unwrap();
-
-    //read user input
-    io::stdin()
-        .read_line(&mut buffer)
-        .expect("could not read input");
-
-    buffer.trim();
-
-    let name: String;
-    name = buffer;
-
-    let data = FileData {
-        pass: genpass(20),
-        id: name,
-        date: Utc::now().date().naive_utc().to_string(),
-    };
-    return data;
-}
+// struct FileData {
+//     id: String,
+//     pass: String,
+//     date: String,
+// }
+//
+// fn file_data() -> FileData {
+//     let mut buffer = String::new();
+//     print!("\nEnter name associated with data: ");
+//     io::stdout().flush().unwrap();
+//
+//     //read user input
+//     io::stdin()
+//         .read_line(&mut buffer)
+//         .expect("could not read input");
+//
+//     buffer.trim();
+//
+//     let name: String;
+//     name = buffer;
+//
+//     let data = FileData {
+//         pass: genpass(20),
+//         id: name,
+//         date: Utc::now().date().naive_utc().to_string(),
+//     };
+//     return data;
+// }
