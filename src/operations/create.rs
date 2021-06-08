@@ -1,5 +1,3 @@
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
 use std::io::Write;
 
 use rpassword;
@@ -136,23 +134,4 @@ pub fn get_password() -> Result<'static, Box<String>> {
     } else {
         Err(PasswordStoreError::ErrorMisMatchPasswordCreation)
     }
-}
-
-// Create function:
-//  hash store name
-//  validate store name: -> If no name, throw new error
-//  get user and password from command line
-//  encrypt secrets
-//  append to file with new user/password
-
-///generates a random alphanumeric string, with a length of the passed in integer
-/// random character code from: (https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html)
-//Todo: Add as user function
-fn genpass(length: u32) -> String {
-    let rand_string: String = thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(length as usize)
-        .map(char::from)
-        .collect();
-    rand_string
 }

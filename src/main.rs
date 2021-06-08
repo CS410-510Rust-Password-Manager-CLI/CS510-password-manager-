@@ -100,7 +100,7 @@ fn main() {
                 }
             }
             "list" => {
-                if let Err(e) = operations::list::list_all_stores(store_name) {
+                if let Err(e) = operations::list::list_all_entries(store_name) {
                     println!("{}", e);
                     std::process::exit(1);
                 }

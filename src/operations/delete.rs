@@ -65,9 +65,19 @@ pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
     match get_index(entry_name, &(*all_secrets_final)){
         Some(index) => {
             //remove entry from entries vector where name matches, if match found
+            let mut entry_name_vec = Vec::new();
+            entry_name_vec.push(all_secrets_final.entries[*index].name.clone());
             all_secrets_final.entries.remove(*index);
             match write_to_file(&all_secrets_final, &store_hash) {
-                Ok(()) => Ok(()),
+                Ok(()) => {
+                    match clean_up_rsa_keys(entry_name_vec){
+                        Ok(()) => {
+                            println!("{}", UserMessage::DeletedEntrySuccessfully.value());
+                            Ok(())
+                        }
+                        Err(e) => Err(e)
+                    }
+                },
                 Err(e) => Err(e)
             }
         }
@@ -80,10 +90,12 @@ pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
     }
 }
 
-fn clean_up_RSA_keys(key_names: Vec<String>){
+fn clean_up_rsa_keys(key_names: Vec<String>) -> Result<'static, ()>{
     for key in key_names{
         let key_path = format!("{}/{}.json",
                                GlobalConfiguration::KeyStoreDir.value().unwrap(),
                                 key);
     }
+
+    Ok(())
 }
