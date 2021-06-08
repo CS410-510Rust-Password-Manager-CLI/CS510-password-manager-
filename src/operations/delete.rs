@@ -45,7 +45,6 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
 
     //delete the file
     match fs::remove_file(file_path) {
-        // TODO: Fix this
         Err(_e) => return Err(PasswordStoreError::ErrorStoreDoesNotExist),
         Ok(_a) => {
             println!("{}", UserMessage::DeletedEntrySuccessfully.value());

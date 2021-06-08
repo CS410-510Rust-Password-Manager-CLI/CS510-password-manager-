@@ -6,8 +6,10 @@ use std::str;
 use text_io::read;
 use rpassword;
 
+// Internal libraries
 use crate::generic::common::{
     calculate_store_name_hash,
+    does_store_exist,
 };
 use crate::generic::errors::{
     Result,
@@ -18,25 +20,28 @@ use crate::generic::encryption::{
     create_new_rsa_private_key
 };
 
-//Uses the user passed store name to create a file in the .passmanager folder.
-// The file will contain a generated password, date created and user entered name.
 
-// Gather user info for new data entry
-//TODO: Check if store exists first
-pub fn create_menu(store_name: &str) -> Result<'static, ()>{
+/**
+    Entry point for the create operation.
+**/
+pub fn create_entry_point(store_name: &str) -> Result<'static, ()>{
+    // Check if the requested store exists
+    if !does_store_exist(store_name) {
+        // Throw error if the requested store does not exist
+        return Err(PasswordStoreError::ErrorStoreDoesNotExist)
+    }
+
+    // Get user data from the command line
     let entry_name: String = *get_entry_name();
     let username: String = *get_username();
     match get_password(){
         Ok(b) => {
             let password: String = *b;
             let key_name = calculate_store_name_hash(&entry_name).to_string();
-            println!("The Entry name is: {}", entry_name);
-            println!("The user name is: {}", username);
-            println!("Pass: {}", password);
+            // If we get all data, create a new private RSA key from the entry name
             match create_new_rsa_private_key(&key_name){
                 Ok(()) => {
-                    // Once the key is successfully written, read the key and generate a pub key
-                    // to encrypt and save to file
+                    // Once the key is successfully generated, encrypt the private data
                     let hashed_store_name = calculate_store_name_hash(store_name).to_string();
                     encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name, &entry_name);
                     Ok(())
@@ -49,32 +54,30 @@ pub fn create_menu(store_name: &str) -> Result<'static, ()>{
 }
 
 // Read from stdin for the entry name
+// Return a Box with the entry name
 pub fn get_entry_name() -> Box<String>{
-    print!("Entry Name: ");
     std::io::stdout().flush().unwrap();
     let entry_name: String = read!("{}\n");
     // String does not implement clone trait, must clone explicitly
     let b = Box::new(entry_name.clone());
-    //println!("The username is: {}", username);
     return b
 }
 
 // Read from stdin for the username
+// Return a Box with the username
 pub fn get_username() -> Box<String>{
-    print!("Username: ");
     std::io::stdout().flush().unwrap();
     let username: String = read!("{}\n");
     // String does not implement clone trait, must clone explicitly
     let b = Box::new(username.clone());
-    //println!("The username is: {}", username);
     return b
 }
 
 // Read password from stdin twice
 // Verifies that the result is accurate before returning
+// Stdin input is not revealed on the command line
 // If the passwords do not match, throw error
 pub fn get_password() -> Result<'static, Box<String>>{
-    // Need to encrypt here
     let pass = rpassword::prompt_password_stdout("Password: ").unwrap();
     let pass_verify = rpassword::prompt_password_stdout("Password Verification: ").unwrap();
 
@@ -95,6 +98,7 @@ pub fn get_password() -> Result<'static, Box<String>>{
 
 ///generates a random alphanumeric string, with a length of the passed in integer
 /// random character code from: (https://rust-lang-nursery.github.io/rust-cookbook/algorithms/randomness.html)
+//Todo: Add as user function
 fn genpass(length: u32) -> String {
     let rand_string: String = thread_rng()
         .sample_iter(&Alphanumeric)

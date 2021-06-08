@@ -2,8 +2,15 @@ extern crate home;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
+use std::fs::File;
 
 use crate::generic::errors::Result;
+
+use crate::models::data_model::{
+    Entry,
+    EntryStore
+};
+use std::io::BufReader;
 
 // Global Configurations for the password manager
 pub enum GlobalConfiguration {
@@ -112,4 +119,19 @@ pub fn does_store_exist(store_name: &str) -> bool{
     let store_base_path = GlobalConfiguration::StoreDir.value().unwrap();
     let store_path: &str = &format!("{0}/{1}.json", store_base_path, store_hash);
     return Path::new(store_path).exists()
+}
+
+// Get all secrets from specific store
+pub fn get_all_secrets<'a>(store_name: &str) -> Result<'static, Box<EntryStore>> {
+    let base_store_path = GlobalConfiguration::StoreDir.value().unwrap();
+    let store_hash = calculate_store_name_hash(store_name);
+    let store_path = format!("{0}/{1}.json", base_store_path, store_hash);
+
+    // Read data back to struct
+    // Open the file in read-only mode with buffer.
+    let file = File::open(Path::new(&store_path)).unwrap();
+    let reader = BufReader::new(file);
+    let secret_entries: EntryStore = serde_json::from_reader(reader).unwrap();
+
+    return Ok(Box::new(secret_entries))
 }

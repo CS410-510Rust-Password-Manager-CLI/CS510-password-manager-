@@ -67,7 +67,7 @@ fn main() {
             }
             "create" => {
                 println!("Create");
-                if let Err(e) = operations::create::create_menu(store_name) {
+                if let Err(e) = operations::create::create_entry_point(store_name) {
                     println!("{}", e);
                     std::process::exit(1);
                 }
@@ -85,7 +85,13 @@ fn main() {
                     std::process::exit(1);
                 }
             },
-            "modify" => println!("modify!"),
+            "modify" => {
+                let entry_name= matches.value_of("entry_name").unwrap();
+                if let Err(e) = operations::get::display_secret(store_name, entry_name){
+                    println!("{}", e);
+                    std::process::exit(1);
+                }
+            },
             _ => println!("Must enter a valid operation"),
         }
     } else {

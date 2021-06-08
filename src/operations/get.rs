@@ -1,6 +1,7 @@
 use crate::generic::common::{
     does_store_exist,
     calculate_store_name_hash,
+    get_all_secrets,
     GlobalConfiguration
 };
 use crate::models::data_model::{
@@ -10,6 +11,9 @@ use crate::models::data_model::{
 use crate::generic::errors::{
     PasswordStoreError,
     Result
+};
+use crate::generic::encryption::{
+    decrypt_secret
 };
 
 use std::io::BufReader;
@@ -37,62 +41,18 @@ pub fn display_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>
     }
 }
 
-// Gets a secret from the a secret store
-pub fn decrypt_secret(entry_name: &str, raw_entry: &Entry) -> std::io::Result<()> {
-    let key_name = calculate_store_name_hash(entry_name);
-    let key_file_path = format!(
-        "{}/{}.pem",
-        GlobalConfiguration::KeyStoreDir.value().unwrap(),
-        key_name
-    );
-    let mut file = File::open(key_file_path).unwrap();
-    let mut priv_key_buf = String::new();
-    file.read_to_string(&mut priv_key_buf);
-
-    let der_encoded = priv_key_buf
-        .lines()
-        .filter(|line| !line.starts_with("-"))
-        .fold(String::new(), |mut data, line| {
-            data.push_str(&line);
-            data
-        });
-    let der_bytes = base64::decode(&der_encoded).expect("failed to decode base64 content");
-    let private_key = RSAPrivateKey::from_pkcs1(&der_bytes).expect("failed to parse key");
-    let dec_user_data = private_key.decrypt(PaddingScheme::new_pkcs1v15_encrypt(), &raw_entry.username).expect("Could not decrypt");
-    let dec_pass_data = private_key.decrypt(PaddingScheme::new_pkcs1v15_encrypt(), &raw_entry.password).expect("Could not decrypt");
-
-    println!("Username: {}", std::str::from_utf8(&dec_user_data).unwrap());
-    println!("Password: {}", std::str::from_utf8(&dec_pass_data).unwrap());
-
-    Ok(())
-}
-
-
-// store function:
-//      check hashed store name:
-//          if not found or invalid: return error
-//      check secret name:
-//          if not valid or not found: return error
-//      return secret to screen
 pub fn get_raw_secret<'a>(store_name: &str, entry_name: &str) -> Result<'static, Box<Entry>> {
-    let base_store_path = GlobalConfiguration::StoreDir.value().unwrap();
-    let store_hash = calculate_store_name_hash(store_name);
-    let store_path = format!("{0}/{1}.json", base_store_path, store_hash);
-
-    // Read data back to struct
-    // Open the file in read-only mode with buffer.
-    let file = File::open(Path::new(&store_path)).unwrap();
-    let reader = BufReader::new(file);
-    let secret_entries: EntryStore = serde_json::from_reader(reader).unwrap();
-
-    // Iterate through all entries and return an entry matching the entry name
-    for entry in secret_entries.entries{
-        if entry.name == entry_name{
-            println!("Found secret!");
-            let b = Box::new(entry);
-            return Ok(b);
+    match get_all_secrets(store_name){
+        Ok(secrets) => {
+            // Iterate through all entries and return an entry matching the entry name
+            for entry in (*secrets).entries{
+                if entry.name == entry_name{
+                    let b = Box::new(entry);
+                    return Ok(b)
+                }
+            }
+            Err(PasswordStoreError::ErrorEntryDoesNotExist)
         }
+        Err(e) => Err(e)
     }
-
-    Err(PasswordStoreError::ErrorEntryDoesNotExist)
 }
