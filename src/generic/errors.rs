@@ -14,6 +14,8 @@ pub enum PasswordStoreError<'a> {
     ErrorCreatingStorePath,
     #[error("Must enter a store name")]
     ErrorNoStoreName,
+    #[error("Did not create a store")]
+    ErrorCouldNotCreateStore,
     #[error("Entered passwords do not match! Passwords must match to create an entry!")]
     ErrorMisMatchPasswordCreation,
     #[error("Could not generate new RSA private key!")]

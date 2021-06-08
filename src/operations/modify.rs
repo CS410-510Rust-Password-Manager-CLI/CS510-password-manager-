@@ -1,5 +1,5 @@
 use crate::generic::common::{
-    get_all_secrets, does_store_exist, get_index, calculate_store_name_hash, write_to_file};
+    get_all_secrets, does_store_exist, calculate_store_name_hash, write_to_file};
 use crate::generic::errors::{
     Result,
     PasswordStoreError
@@ -12,7 +12,6 @@ use crate::operations::create::{
     get_username,
     add_to_store
 };
-use crate::models::data_model::{Entry, EntryStore};
 
 // Modify a data entry
 pub fn modify_entry<'a>(store_name: &str, entry_name: &str) -> Result<'a, ()>{
@@ -35,13 +34,14 @@ pub fn modify_entry<'a>(store_name: &str, entry_name: &str) -> Result<'a, ()>{
 
                     // Fail back if error occurs with modifying password after
                     // the entry has already been removed
-                    write_to_file(&(*failback_copy.unwrap()),
-                                  &calculate_store_name_hash(entry_name).to_string());
-                    Err(e)
+                    match write_to_file(&(*failback_copy.unwrap()),
+                                  &calculate_store_name_hash(entry_name).to_string()){
+                        Ok(()) => Err(e),
+                        Err(e) => Err(e)
+                    }
                 }
             }
         },
         Err(e) => Err(e)
-    };
-    Ok(())
+    }
 }

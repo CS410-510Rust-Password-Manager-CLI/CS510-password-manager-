@@ -12,8 +12,13 @@ pub fn display_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>
 
     match get_raw_secret(store_name, entry_name) {
         Some(raw_entry) => {
-            decrypt_secret(entry_name, &(*raw_entry));
-            Ok(())
+            match decrypt_secret(entry_name, &(*raw_entry)){
+                Ok(()) => Ok(()),
+                Err(e) => {
+                    println!("{}", e.to_string());
+                    Err(PasswordStoreError::ErrorDataEncryption)
+                }
+            }
         }
         None => Err(PasswordStoreError::ErrorEntryDoesNotExist),
     }

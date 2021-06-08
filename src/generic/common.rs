@@ -152,8 +152,8 @@ pub fn write_to_file<'a>(entry_store: &EntryStore, hashed_store_name: &str) -> R
     Ok(())
 }
 
-pub fn get_index<'a>(entry_name: &str, store: &EntryStore) -> Result<'a, Box<i32>>{
-    let mut index = 0;
+pub fn get_index(entry_name: &str, store: &EntryStore) -> Option<Box<usize>>{
+    let mut index: usize = 0;
     let mut found = false;
 
     //loop through entries to find matching name
@@ -165,8 +165,8 @@ pub fn get_index<'a>(entry_name: &str, store: &EntryStore) -> Result<'a, Box<i32
         index += 1;
     }
     if found {
-        Ok(Box::new(index))
+        Some(Box::new(index))
     } else {
-        Err(PasswordStoreError::ErrorNoEntryNameMatch)
+        None
     }
 }
