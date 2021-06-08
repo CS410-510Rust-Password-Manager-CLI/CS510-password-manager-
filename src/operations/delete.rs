@@ -9,7 +9,18 @@ use std::io::Write;
 // RSA private keys and cleaned up and that password file can be
 // restored in case of error
 pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
-    // Todo: Verify name of story with user before delete
+    let mut buffer = String::new();
+    print!("\nEnter storename again to verify: ");
+    io::stdout().flush().unwrap();
+    io::stdin()
+        .read_line(&mut buffer)
+        .expect("could not read input");
+
+    let verified = buffer.trim();
+    if verified != store_name {
+        return Err(PasswordStoreError::ErrorMisMatchStoreName);
+    }
+
     match get_entry_names(store_name){
         Some(entry_names) => {
             for name in entry_names.iter(){
@@ -17,14 +28,32 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
                     return Err(e)
                 }
             }
-            //Todo: Delete store file
-            Ok(())
+            //hash the store name
+            let hash_store_name = calculate_store_name_hash(store_name);
+
+            //get file path of hashed store name
+            let file_path = format!("{}/{}.json",
+                GlobalConfiguration::StoreDir.value().unwrap(),
+                hash_store_name);
+
+            //delete the store file
+            match remove_file(file_path) {
+                Err(e) => {
+                    println!("{}", e.to_string());
+                    return Err(PasswordStoreError::ErrorStoreDoesNotExist)
+                },
+                Ok(()) => {
+                    println!("{}", UserMessage::DeletedEntrySuccessfully.value());
+                    Ok(())
+                }
+            }
         }
         None => Err(PasswordStoreError::ErrorNoStoreName)
     }
 }
 
 // Deletes a secret entry in a store
+// Todo: Enter secret again to delete
 pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
     if !does_store_exist(store_name) {
         return Err(PasswordStoreError::ErrorStoreDoesNotExist);
