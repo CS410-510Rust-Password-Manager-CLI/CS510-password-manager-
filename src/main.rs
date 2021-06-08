@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 
-mod operations {
+pub mod operations {
     pub mod create;
     pub mod delete;
     pub mod get;
@@ -9,17 +9,21 @@ mod operations {
     pub mod modify;
 }
 
-mod models {
+pub mod models {
     pub mod data_model;
 }
 
-mod generic {
+pub mod generic {
     pub mod common;
     pub mod encryption;
     pub mod errors;
 }
 
-fn main() {
+pub mod mocks {
+    pub mod test_mocks;
+}
+
+pub fn main() {
     // Get all command line args
     let matches = App::new("Password Manager")
         .version("1.0")

@@ -1,13 +1,18 @@
-extern crate home;
+use crate::generic::errors::{PasswordStoreError, Result};
+use crate::models::data_model::EntryStore;
+#[cfg(not(test))]
+use home::home_dir;
 use std::collections::hash_map::DefaultHasher;
 use std::fs::File;
 use std::hash::{Hash, Hasher};
+use std::io::BufReader;
 use std::path::Path;
 
-use crate::generic::errors::{PasswordStoreError, Result};
-
-use crate::models::data_model::EntryStore;
-use std::io::BufReader;
+#[cfg(test)]
+use crate::mocks::test_mocks::{
+    home_dir,
+    is_dir
+};
 
 // Global Configurations for the password manager
 pub enum GlobalConfiguration {
@@ -19,7 +24,7 @@ pub enum GlobalConfiguration {
 // Function to pass back home dir and store dir path locations
 impl GlobalConfiguration {
     pub fn value(&self) -> Result<String> {
-        let hdir = home::home_dir();
+        let hdir = home_dir();
         match hdir {
             Some(path) => {
                 //a home env variable exists
@@ -95,7 +100,10 @@ pub fn calculate_store_name_hash<T: Hash + ?Sized>(t: &T) -> u64 {
 // Check if the base dir exists
 pub fn base_dir_exist() -> bool {
     match GlobalConfiguration::HomeDir.value() {
-        Ok(path) => Path::new(&path).is_dir(),
+        Ok(_path) => {
+            let result = Path::new(&_path).is_dir();
+            result
+        },
         _ => false,
     }
 }
@@ -137,7 +145,6 @@ pub fn get_all_secrets(store_name: &str) -> Option<Box<EntryStore>> {
     match serde_json::from_reader(reader) {
         Ok(secret_entries) => Some(Box::new(secret_entries)),
         Err(e) => {
-            println!("{:?}", e);
             None
         }
     }
@@ -178,15 +185,45 @@ pub fn get_index(entry_name: &str, store: &EntryStore) -> Option<Box<usize>> {
 }
 
 pub fn get_entry_names(store_name: &str) -> Option<Vec<String>> {
-    let entry_store = *get_all_secrets(store_name).unwrap();
-    let mut entry_names = Vec::new();
-    for entry in entry_store.entries {
-        entry_names.push(entry.name)
+    match get_all_secrets(store_name){
+        Some(entry_store) =>{
+            let mut entry_names = Vec::new();
+            for entry in entry_store.entries {
+                entry_names.push(entry.name)
+            }
+            if entry_names.is_empty() {
+                None
+            } else {
+                Some(entry_names)
+            }
+        }
+        None => None
     }
+}
 
-    if entry_names.is_empty() {
-        None
-    } else {
-        Some(entry_names)
-    }
+#[test]
+fn get_home_dir() {
+    let actual = GlobalConfiguration::HomeDir.value().unwrap();
+    let expected = "/home/.passmanager";
+    assert_eq!(actual, expected)
+}
+#[test]
+fn get_store_dir() {
+    let actual = GlobalConfiguration::StoreDir.value().unwrap();
+    let expected = "/home/.passmanager/.store";
+    assert_eq!(actual, expected)
+}
+
+#[test]
+fn get_keystore_dir() {
+    let actual = GlobalConfiguration::KeyStoreDir.value().unwrap();
+    let expected = "/home/.passmanager/.keys";
+    assert_eq!(actual, expected)
+}
+
+#[test]
+fn is_home_dir_exist(){
+    let actual = base_dir_exist();
+    let expected = true;
+    assert_eq!(actual, expected)
 }

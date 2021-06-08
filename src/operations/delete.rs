@@ -12,7 +12,7 @@ use std::io::{stdin, stdout, Write};
 // restored in case of error
 pub fn delete_secret_store(store_name: &str) -> Result<'static, ()> {
     let mut buffer = String::new();
-    print!("\nEnter storename again to verify: ");
+    print!("\nEnter store name again to verify deletion: ");
     stdout().flush().unwrap();
     stdin()
         .read_line(&mut buffer)
