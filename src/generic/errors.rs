@@ -29,6 +29,8 @@ pub enum PasswordStoreError<'a> {
     ErrorMisMatchStoreName,
     #[error("Entered entry name does not exist in this store!")]
     ErrorEntryDoesNotExist,
+    #[error("No matching entry name found")]
+    ErrorNoEntryNameMatch,
 }
 
 pub type Result<'a, T> = std::result::Result<T, PasswordStoreError<'a>>;

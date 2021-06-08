@@ -7,6 +7,7 @@ use crate::generic::common::{
     UserMessage,
     calculate_store_name_hash,
     does_store_exist,
+    get_all_secrets,
 
 };
 use std::fs;
@@ -55,8 +56,8 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
 }
 
 // Deletes a secret store
-pub fn delete_secret(store_name: &str, entry_name: &str){
-    // Check if this store exists, if not return error
+pub fn delete_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>{
+    // Check if this store exists, if not return error *
     // Get all secrets from this specific store
     // Make a copy
     // Iterate through and find the specific entry we want to delete
@@ -65,4 +66,33 @@ pub fn delete_secret(store_name: &str, entry_name: &str){
     // Once we have the correct secret, delete it from the EntryStore data object
     // -------------------------------------------------
     // Write the EntryStore data object back to the disk
+
+    if !does_store_exist(store_name) {
+        return Err(PasswordStoreError::ErrorStoreDoesNotExist)
+    }
+
+    let all_secrets = get_all_secrets(store_name).unwrap();
+    let mut all_secrets_final = get_all_secrets(store_name).unwrap();
+
+    let mut count = 0;
+    let mut found = false;
+
+    //loop through entries to find matching name
+    for entry in all_secrets.entries {
+        if entry.name == entry_name {
+            found = true;
+            break;
+        }
+        count += 1;
+    }
+
+    //remove entry from entries vector where name matches, if match found
+    if found {
+        all_secrets_final.entries.remove(count);
+    } else {
+        return Err(PasswordStoreError::ErrorNoEntryNameMatch);
+    }
+
+    //TODO: write back to disk
+    Ok(())
 }
