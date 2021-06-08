@@ -1,17 +1,12 @@
 extern crate home;
 use std::collections::hash_map::DefaultHasher;
+use std::fs::File;
 use std::hash::{Hash, Hasher};
 use std::path::Path;
-use std::fs::File;
 
-use crate::generic::errors::{
-    Result,
-    PasswordStoreError
-};
+use crate::generic::errors::{PasswordStoreError, Result};
 
-use crate::models::data_model::{
-    EntryStore
-};
+use crate::models::data_model::EntryStore;
 use std::io::BufReader;
 
 // Global Configurations for the password manager
@@ -95,7 +90,7 @@ pub fn calculate_store_name_hash<T: Hash + ?Sized>(t: &T) -> u64 {
 pub fn base_dir_exist() -> bool {
     match GlobalConfiguration::HomeDir.value() {
         Ok(path) => Path::new(&path).is_dir(),
-        Err(e) => false,
+        _ => false,
     }
 }
 
@@ -103,7 +98,7 @@ pub fn base_dir_exist() -> bool {
 pub fn store_dir_exist() -> bool {
     match GlobalConfiguration::StoreDir.value() {
         Ok(path) => Path::new(&path).is_dir(),
-        Err(e) => false,
+        _ => false,
     }
 }
 
@@ -111,20 +106,20 @@ pub fn store_dir_exist() -> bool {
 pub fn key_store_dir_exist() -> bool {
     match GlobalConfiguration::KeyStoreDir.value() {
         Ok(path) => Path::new(&path).is_dir(),
-        Err(e) => false,
+        _ => false,
     }
 }
 
 // Check if specific store file exists
-pub fn does_store_exist(store_name: &str) -> bool{
+pub fn does_store_exist(store_name: &str) -> bool {
     let store_hash = calculate_store_name_hash(store_name);
     let store_base_path = GlobalConfiguration::StoreDir.value().unwrap();
     let store_path: &str = &format!("{0}/{1}.json", store_base_path, store_hash);
-    return Path::new(store_path).exists()
+    return Path::new(store_path).exists();
 }
 
 // Get all secrets from specific store
-pub fn get_all_secrets<'a>(store_name: &str) -> Option<Box<EntryStore>>{
+pub fn get_all_secrets<'a>(store_name: &str) -> Option<Box<EntryStore>> {
     let base_store_path = GlobalConfiguration::StoreDir.value().unwrap();
     let store_hash = calculate_store_name_hash(store_name);
     let store_path = format!("{0}/{1}.json", base_store_path, store_hash);
@@ -133,20 +128,25 @@ pub fn get_all_secrets<'a>(store_name: &str) -> Option<Box<EntryStore>>{
     // Open the file in read-only mode with buffer.
     let file = File::open(Path::new(&store_path)).unwrap();
     let reader = BufReader::new(file);
-    match serde_json::from_reader(reader){
+    match serde_json::from_reader(reader) {
         Ok(secret_entries) => Some(Box::new(secret_entries)),
-        Err(e) => None
+        Err(e) => {
+            println!("{:?}", e);
+            None
+        }
     }
 }
 
-pub fn write_to_file<'a>(entry_store: &EntryStore, hashed_store_name: &str) -> Result<'a, ()>{
-    // // Need to read in current entries
-
+pub fn write_to_file<'a>(entry_store: &EntryStore, hashed_store_name: &str) -> Result<'a, ()> {
     let serialized_data = serde_json::to_string(&entry_store).unwrap();
-    let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), hashed_store_name);
+    let store_path = format!(
+        "{0}/{1}.json",
+        GlobalConfiguration::StoreDir.value().unwrap(),
+        hashed_store_name
+    );
     println!("Path: {}", store_path);
     println!("Data: {}", serialized_data);
-    let mut store_file = File::create(Path::new(&store_path)).unwrap();
+    let store_file = File::create(Path::new(&store_path)).unwrap();
     serde_json::to_writer(store_file, &entry_store).unwrap();
     println!("Saved!");
     Ok(())

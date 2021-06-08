@@ -1,28 +1,32 @@
-use crate::generic::errors::{
-    Result,
-    PasswordStoreError
+use crate::generic::common::{
+    calculate_store_name_hash, does_store_exist, get_all_secrets, write_to_file,
+    GlobalConfiguration, UserMessage,
 };
-use crate::generic::common::{GlobalConfiguration, UserMessage, calculate_store_name_hash, does_store_exist, get_all_secrets, write_to_file};
+use crate::generic::errors::{PasswordStoreError, Result};
 use std::fs;
 use std::io;
 use std::io::Write;
 
 // Deletes a secret from a secret store
 // When deleting secret store, verify the store name before deleting
-pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
+pub fn delete_secret_store(store_name: &str) -> Result<'static, ()> {
     // Hash store name, find file, verify, delete
     // Throw error if user inputs store name wrong in verify
     // Print UserMessage on successful deletion
 
     if !does_store_exist(store_name) {
-        return Err(PasswordStoreError::ErrorStoreDoesNotExist)
+        return Err(PasswordStoreError::ErrorStoreDoesNotExist);
     }
 
     //hash the store name
     let hash_store_name = calculate_store_name_hash(store_name);
 
     //get file path of hashed store name
-    let file_path = format!("{}/{}.json", GlobalConfiguration::StoreDir.value().unwrap(), hash_store_name);
+    let file_path = format!(
+        "{}/{}.json",
+        GlobalConfiguration::StoreDir.value().unwrap(),
+        hash_store_name
+    );
 
     //verify store name
     let mut buffer = String::new();
@@ -34,7 +38,7 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
 
     let verified = buffer.trim();
     if verified != store_name {
-        return Err(PasswordStoreError::ErrorMisMatchStoreName)
+        return Err(PasswordStoreError::ErrorMisMatchStoreName);
     }
 
     //delete the file
@@ -45,11 +49,10 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
             Ok(())
         }
     }
-    
 }
 
 // Deletes a secret entry in a store
-pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()>{
+pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
     // Check if this store exists, if not return error *
     // Get all secrets from this specific store
     // Make a copy
@@ -61,7 +64,7 @@ pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()>{
     // Write the EntryStore data object back to the disk
 
     if !does_store_exist(store_name) {
-        return Err(PasswordStoreError::ErrorStoreDoesNotExist)
+        return Err(PasswordStoreError::ErrorStoreDoesNotExist);
     }
 
     let all_secrets = get_all_secrets(store_name).unwrap();

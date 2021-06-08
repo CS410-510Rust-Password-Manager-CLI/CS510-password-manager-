@@ -1,15 +1,10 @@
-use crate::generic::common::{
-    GlobalConfiguration,
-    calculate_store_name_hash
-};
-use crate::models::data_model::{
-    Entry,
-};
+use crate::generic::common::{calculate_store_name_hash, GlobalConfiguration};
+use crate::models::data_model::Entry;
 
-use std::fs::File;
-use rsa::{PaddingScheme, PrivateKeyPemEncoding, PublicKey, RSAPrivateKey, RSAPublicKey};
-use std::io::{Read, Write};
 use rand::rngs::OsRng;
+use rsa::{PaddingScheme, PrivateKeyPemEncoding, PublicKey, RSAPrivateKey, RSAPublicKey};
+use std::fs::File;
+use std::io::{Read, Write};
 
 // Creates a new RSA private key for every password entry
 // Saves the created private key to a pem file stored in the .keys
@@ -37,7 +32,6 @@ pub fn encrypt_data_with_private_key(
     key_name: &str,
     username: &str,
     password: &str,
-    hashed_store_name: &str,
     entry_name: &str,
 ) -> std::io::Result<Box<Entry>> {
     let key_file_path = format!(
@@ -81,7 +75,7 @@ pub fn encrypt_data_with_private_key(
         .expect("failed to encrypt password");
 
     // Create new data entry from encrypted data
-    let new_entry = Entry{
+    let new_entry = Entry {
         name: entry_name.to_string(),
         username: enc_username_data,
         password: enc_password_data,
@@ -111,8 +105,12 @@ pub fn decrypt_secret(entry_name: &str, raw_entry: &Entry) -> std::io::Result<()
         });
     let der_bytes = base64::decode(&der_encoded).expect("failed to decode base64 content");
     let private_key = RSAPrivateKey::from_pkcs1(&der_bytes).expect("failed to parse key");
-    let dec_user_data = private_key.decrypt(PaddingScheme::new_pkcs1v15_encrypt(), &raw_entry.username).expect("Could not decrypt");
-    let dec_pass_data = private_key.decrypt(PaddingScheme::new_pkcs1v15_encrypt(), &raw_entry.password).expect("Could not decrypt");
+    let dec_user_data = private_key
+        .decrypt(PaddingScheme::new_pkcs1v15_encrypt(), &raw_entry.username)
+        .expect("Could not decrypt");
+    let dec_pass_data = private_key
+        .decrypt(PaddingScheme::new_pkcs1v15_encrypt(), &raw_entry.password)
+        .expect("Could not decrypt");
 
     println!("Username: {}", std::str::from_utf8(&dec_user_data).unwrap());
     println!("Password: {}", std::str::from_utf8(&dec_pass_data).unwrap());

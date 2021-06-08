@@ -5,8 +5,8 @@ mod operations {
     pub mod delete;
     pub mod get;
     pub mod init;
-    pub mod modify;
     pub mod list;
+    pub mod modify;
 }
 
 mod models {
@@ -15,8 +15,8 @@ mod models {
 
 mod generic {
     pub mod common;
-    pub mod errors;
     pub mod encryption;
+    pub mod errors;
 }
 
 fn main() {
@@ -79,28 +79,28 @@ fn main() {
                 }
             }
             "delete-entry" => {
-                let entry_name= matches.value_of("entry_name").unwrap();
+                let entry_name = matches.value_of("entry_name").unwrap();
                 if let Err(e) = operations::delete::delete_entry(store_name, entry_name) {
                     println!("{}", e);
                     std::process::exit(1);
                 }
             }
             "get" => {
-                let entry_name= matches.value_of("entry_name").unwrap();
-                if let Err(e) = operations::get::display_secret(store_name, entry_name){
+                let entry_name = matches.value_of("entry_name").unwrap();
+                if let Err(e) = operations::get::display_secret(store_name, entry_name) {
                     println!("{}", e);
                     std::process::exit(1);
                 }
-            },
+            }
             "modify" => {
-                let entry_name= matches.value_of("entry_name").unwrap();
-                if let Err(e) = operations::get::display_secret(store_name, entry_name){
+                let entry_name = matches.value_of("entry_name").unwrap();
+                if let Err(e) = operations::get::display_secret(store_name, entry_name) {
                     println!("{}", e);
                     std::process::exit(1);
                 }
-            },
+            }
             "list" => {
-                if let Err(e) = operations::list::list_all_stores(store_name){
+                if let Err(e) = operations::list::list_all_stores(store_name) {
                     println!("{}", e);
                     std::process::exit(1);
                 }
