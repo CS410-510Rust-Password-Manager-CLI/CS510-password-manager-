@@ -220,10 +220,3 @@ fn get_keystore_dir() {
     let expected = "/home/.passmanager/.keys";
     assert_eq!(actual, expected)
 }
-
-#[test]
-fn is_home_dir_exist(){
-    let actual = base_dir_exist();
-    let expected = true;
-    assert_eq!(actual, expected)
-}
