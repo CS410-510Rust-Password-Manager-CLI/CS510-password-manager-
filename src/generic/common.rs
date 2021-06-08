@@ -170,3 +170,17 @@ pub fn get_index(entry_name: &str, store: &EntryStore) -> Option<Box<usize>>{
         None
     }
 }
+
+pub fn get_entry_names(store_name: &str) -> Option<Box<Vec<String>>>{
+    let entry_store = *get_all_secrets(store_name).unwrap();
+    let mut entry_names = Vec::new();
+    for entry in entry_store.entries{
+       entry_names.push(entry.name)
+    }
+
+    if entry_names.is_empty(){
+        None
+    }else{
+        Some(Box::new(entry_names))
+    }
+}

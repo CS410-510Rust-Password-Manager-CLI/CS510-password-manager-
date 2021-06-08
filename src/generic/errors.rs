@@ -38,6 +38,8 @@ pub enum PasswordStoreError<'a> {
     ErrorEncryptionError,
     #[error("Store does not have any data!")]
     ErrorStoreNoData,
+    #[error("Could not delete RSA Private Key!")]
+    ErrorRSAKeyDelete,
 }
 
 pub type Result<'a, T> = std::result::Result<T, PasswordStoreError<'a>>;
