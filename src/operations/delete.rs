@@ -2,14 +2,7 @@ use crate::generic::errors::{
     Result,
     PasswordStoreError
 };
-use crate::generic::common::{
-    GlobalConfiguration,
-    UserMessage,
-    calculate_store_name_hash,
-    does_store_exist,
-    get_all_secrets,
-
-};
+use crate::generic::common::{GlobalConfiguration, UserMessage, calculate_store_name_hash, does_store_exist, get_all_secrets, write_to_file};
 use std::fs;
 use std::io;
 use std::io::Write;
@@ -55,8 +48,8 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
     
 }
 
-// Deletes a secret store
-pub fn delete_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>{
+// Deletes a secret entry in a store
+pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()>{
     // Check if this store exists, if not return error *
     // Get all secrets from this specific store
     // Make a copy
@@ -93,6 +86,7 @@ pub fn delete_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>{
         return Err(PasswordStoreError::ErrorNoEntryNameMatch);
     }
 
-    //TODO: write back to disk
+    let store_hash = calculate_store_name_hash(store_name).to_string();
+    write_to_file(&all_secrets_final, &store_hash);
     Ok(())
 }

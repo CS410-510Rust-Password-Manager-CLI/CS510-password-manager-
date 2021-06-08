@@ -26,11 +26,11 @@ use crate::generic::errors::{
 fn setup_base_dirs() -> Result<'static, ()>{
     let base_path = GlobalConfiguration::HomeDir.value().unwrap();
     match create_dir_all(&base_path){
-        Ok(()) =>
-            {
-                Ok(())
-            },
-        Err(e) => Err(PasswordStoreError::ErrorCreatingBasePath)
+        Ok(()) => Ok(()),
+        Err(e) =>{
+            println!("{:?}", e);
+            Err(PasswordStoreError::ErrorCreatingBasePath)
+        }
     }
 }
 
@@ -39,11 +39,11 @@ fn setup_base_dirs() -> Result<'static, ()>{
 fn setup_store_dirs() -> Result<'static, ()>{
     let base_path = GlobalConfiguration::StoreDir.value().unwrap();
     match create_dir_all(&base_path){
-        Ok(()) =>
-            {
-                Ok(())
-            },
-        Err(e) => Err(PasswordStoreError::ErrorCreatingStorePath)
+        Ok(()) => Ok(()),
+        Err(e) => {
+            println!("{:?}", e);
+            Err(PasswordStoreError::ErrorCreatingStorePath)
+        }
     }
 }
 
@@ -52,11 +52,11 @@ fn setup_store_dirs() -> Result<'static, ()>{
 fn setup_key_store_dirs() -> Result<'static, ()>{
     let base_path = GlobalConfiguration::KeyStoreDir.value().unwrap();
     match create_dir_all(&base_path){
-        Ok(()) =>
-            {
-                Ok(())
-            },
-        Err(e) => Err(PasswordStoreError::ErrorCreatingStorePath)
+        Ok(()) => Ok(()),
+        Err(e) => {
+            println!("{}", e.to_string());
+            Err(PasswordStoreError::ErrorCreatingStorePath)
+        }
     }
 }
 

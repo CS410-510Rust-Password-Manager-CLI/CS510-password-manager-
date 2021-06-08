@@ -4,14 +4,12 @@ use crate::generic::common::{
 };
 use crate::models::data_model::{
     Entry,
-    EntryStore
 };
 
 use std::fs::File;
 use rsa::{PaddingScheme, PrivateKeyPemEncoding, PublicKey, RSAPrivateKey, RSAPublicKey};
 use std::io::{Read, Write};
 use rand::rngs::OsRng;
-use std::path::Path;
 
 // Creates a new RSA private key for every password entry
 // Saves the created private key to a pem file stored in the .keys
@@ -41,7 +39,7 @@ pub fn encrypt_data_with_private_key(
     password: &str,
     hashed_store_name: &str,
     entry_name: &str,
-) -> std::io::Result<()> {
+) -> std::io::Result<Box<Entry>> {
     let key_file_path = format!(
         "{}/{}.pem",
         GlobalConfiguration::KeyStoreDir.value().unwrap(),
@@ -82,9 +80,6 @@ pub fn encrypt_data_with_private_key(
         )
         .expect("failed to encrypt password");
 
-    // Need to read in current entries
-    let mut new_store = EntryStore::new();
-
     // Create new data entry from encrypted data
     let new_entry = Entry{
         name: entry_name.to_string(),
@@ -92,16 +87,7 @@ pub fn encrypt_data_with_private_key(
         password: enc_password_data,
     };
 
-    new_store.entries.push(new_entry);
-
-    let serialized_data = serde_json::to_string(&new_store).unwrap();
-    let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), hashed_store_name);
-    println!("Path: {}", store_path);
-    println!("Data: {}", serialized_data);
-    let mut store_file = File::create(Path::new(&store_path)).unwrap();
-    serde_json::to_writer(store_file, &new_store).unwrap();
-    println!("Saved!");
-    Ok(())
+    Ok(Box::new(new_entry))
 }
 
 // Gets a secret from the a secret store

@@ -6,6 +6,7 @@ mod operations {
     pub mod get;
     pub mod init;
     pub mod modify;
+    pub mod list;
 }
 
 mod models {
@@ -66,14 +67,20 @@ fn main() {
                 }
             }
             "create" => {
-                println!("Create");
                 if let Err(e) = operations::create::create_entry_point(store_name) {
                     println!("{}", e);
                     std::process::exit(1);
                 }
             }
-            "delete" => {
+            "delete-store" => {
                 if let Err(e) = operations::delete::delete_secret_store(store_name) {
+                    println!("{}", e);
+                    std::process::exit(1);
+                }
+            }
+            "delete-entry" => {
+                let entry_name= matches.value_of("entry_name").unwrap();
+                if let Err(e) = operations::delete::delete_entry(store_name, entry_name) {
                     println!("{}", e);
                     std::process::exit(1);
                 }
@@ -92,6 +99,12 @@ fn main() {
                     std::process::exit(1);
                 }
             },
+            "list" => {
+                if let Err(e) = operations::list::list_all_stores(store_name){
+                    println!("{}", e);
+                    std::process::exit(1);
+                }
+            }
             _ => println!("Must enter a valid operation"),
         }
     } else {

@@ -1,7 +1,7 @@
 extern crate home;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::fs::File;
 
 use crate::generic::errors::{
@@ -10,7 +10,6 @@ use crate::generic::errors::{
 };
 
 use crate::models::data_model::{
-    Entry,
     EntryStore
 };
 use std::io::BufReader;
@@ -125,7 +124,7 @@ pub fn does_store_exist(store_name: &str) -> bool{
 }
 
 // Get all secrets from specific store
-pub fn get_all_secrets<'a>(store_name: &str) -> Result<'static, Box<EntryStore>> {
+pub fn get_all_secrets<'a>(store_name: &str) -> Option<Box<EntryStore>>{
     let base_store_path = GlobalConfiguration::StoreDir.value().unwrap();
     let store_hash = calculate_store_name_hash(store_name);
     let store_path = format!("{0}/{1}.json", base_store_path, store_hash);
@@ -134,7 +133,21 @@ pub fn get_all_secrets<'a>(store_name: &str) -> Result<'static, Box<EntryStore>>
     // Open the file in read-only mode with buffer.
     let file = File::open(Path::new(&store_path)).unwrap();
     let reader = BufReader::new(file);
-    let secret_entries: EntryStore = serde_json::from_reader(reader).unwrap();
+    match serde_json::from_reader(reader){
+        Ok(secret_entries) => Some(Box::new(secret_entries)),
+        Err(e) => None
+    }
+}
 
-    return Ok(Box::new(secret_entries))
+pub fn write_to_file<'a>(entry_store: &EntryStore, hashed_store_name: &str) -> Result<'a, ()>{
+    // // Need to read in current entries
+
+    let serialized_data = serde_json::to_string(&entry_store).unwrap();
+    let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), hashed_store_name);
+    println!("Path: {}", store_path);
+    println!("Data: {}", serialized_data);
+    let mut store_file = File::create(Path::new(&store_path)).unwrap();
+    serde_json::to_writer(store_file, &entry_store).unwrap();
+    println!("Saved!");
+    Ok(())
 }
