@@ -1,30 +1,31 @@
-use crate::errors;
-use crate::common;
-use crate::common::{GlobalConfiguration, UserMessage};
+use crate::generic::errors::{
+    Result,
+    PasswordStoreError
+};
+use crate::generic::common::{
+    GlobalConfiguration,
+    UserMessage,
+    calculate_store_name_hash,
+    does_store_exist,
+
+};
 use std::fs;
 use std::io;
 use std::io::Write;
 
-
-
 // Deletes a secret from a secret store
 // When deleting secret store, verify the store name before deleting
-pub fn delete_secret_store(store_name: &str) -> errors::Result<'static, ()>{
+pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
     // Hash store name, find file, verify, delete
     // Throw error if user inputs store name wrong in verify
     // Print UserMessage on successful deletion
 
-
-    //check if store directory exists
-    match common::store_dir_exist() {
-        false => return Err(errors::PasswordStoreError::ErrorStoreDoesNotExist),
-        true => (),
+    if !does_store_exist(store_name) {
+        return Err(PasswordStoreError::ErrorStoreDoesNotExist)
     }
 
-    //TODO: Check that the specific story to delete exists
-
     //hash the store name
-    let hash_store_name = common::calculate_store_name_hash(store_name);
+    let hash_store_name = calculate_store_name_hash(store_name);
 
     //get file path of hashed store name
     let file_path = format!("{}/{}.json", GlobalConfiguration::StoreDir.value().unwrap(), hash_store_name);
@@ -39,13 +40,13 @@ pub fn delete_secret_store(store_name: &str) -> errors::Result<'static, ()>{
 
     let verified = buffer.trim();
     if verified != store_name {
-        return Err(errors::PasswordStoreError::ErrorMisMatchStoreName);
+        return Err(PasswordStoreError::ErrorMisMatchStoreName);
     }
 
     //delete the file
     match fs::remove_file(file_path) {
         // TODO: Fix this
-        Err(_e) => return Err(errors::PasswordStoreError::ErrorStoreDoesNotExist),
+        Err(_e) => return Err(PasswordStoreError::ErrorStoreDoesNotExist),
         Ok(_a) => {
             println!("{}", UserMessage::DeletedEntrySuccessfully.value());
             Ok(())

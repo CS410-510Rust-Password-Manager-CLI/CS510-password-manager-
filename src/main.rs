@@ -1,40 +1,22 @@
-use clap::{App, AppSettings, Arg, Clap, Subcommand};
-
-use crate::common::{GlobalConfiguration, UserMessage};
+use clap::{App, Arg};
 
 mod operations {
     pub mod create;
     pub mod delete;
     pub mod get;
     pub mod init;
+    pub mod modify;
 }
-mod common;
-mod data_model;
-mod errors;
 
-extern crate home;
+mod models {
+    pub mod data_model;
+}
 
-/*
-have a config file located at ~/.passstore/.config
-* passmanager init <name> - create a new password store
-                          - create a pgp key to encrypt the password file store with
-                          - write the file to ~/.passwordstore/stores/<name>
-  passmanager - ls of all password stores
-
-  passmanager <name of store> --create --genpass --name <name of password>
-  passmanager <name of store> --modify
-  passmanager <name of store> --list
-
-       password record:
-            id:
-            encrpytion:
-            secret:
-            access-time:
-            last-modified:
-            user-defined fields:
-                - secret question
-
- */
+mod generic {
+    pub mod common;
+    pub mod errors;
+    pub mod encryption;
+}
 
 fn main() {
     // Get all command line args

@@ -1,20 +1,33 @@
-use crate::errors;
-use crate::common;
-use crate::data_model;
+use crate::generic::common::{
+    does_store_exist,
+    calculate_store_name_hash,
+    GlobalConfiguration
+};
+use crate::models::data_model::{
+    Entry,
+    EntryStore
+};
+use crate::generic::errors::{
+    PasswordStoreError,
+    Result
+};
+
 use std::io::BufReader;
 use std::io::Read;
 use std::fs::File;
-use std::path::{Path, PathBuf};
-use rsa::{PaddingScheme, PrivateKeyPemEncoding, PublicKey, RSAPrivateKey, RSAPublicKey};
-use crate::data_model::Entry;
+use std::path::Path;
+use rsa::{
+    PaddingScheme,
+    RSAPrivateKey
+};
 
 // Entry point for the get operation
-pub fn display_secret(store_name: &str, entry_name: &str) -> errors::Result<'static, ()>{
+pub fn display_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>{
     // Check if store exists
-    if !common::does_store_exist(store_name) {
-        return Err(errors::PasswordStoreError::ErrorStoreDoesNotExist)
+    if !does_store_exist(store_name) {
+        return Err(PasswordStoreError::ErrorStoreDoesNotExist)
     }
-    
+
     match get_raw_secret(store_name, entry_name){
         Ok(raw_entry) => {
             decrypt_secret(entry_name, &(*raw_entry));
@@ -26,10 +39,10 @@ pub fn display_secret(store_name: &str, entry_name: &str) -> errors::Result<'sta
 
 // Gets a secret from the a secret store
 pub fn decrypt_secret(entry_name: &str, raw_entry: &Entry) -> std::io::Result<()> {
-    let key_name = common::calculate_store_name_hash(entry_name);
+    let key_name = calculate_store_name_hash(entry_name);
     let key_file_path = format!(
         "{}/{}.pem",
-        common::GlobalConfiguration::KeyStoreDir.value().unwrap(),
+        GlobalConfiguration::KeyStoreDir.value().unwrap(),
         key_name
     );
     let mut file = File::open(key_file_path).unwrap();
@@ -61,16 +74,16 @@ pub fn decrypt_secret(entry_name: &str, raw_entry: &Entry) -> std::io::Result<()
 //      check secret name:
 //          if not valid or not found: return error
 //      return secret to screen
-pub fn get_raw_secret<'a>(store_name: &str, entry_name: &str) -> errors::Result<'static, Box<(Entry)>> {
-    let base_store_path = common::GlobalConfiguration::StoreDir.value().unwrap();
-    let store_hash = common::calculate_store_name_hash(store_name);
+pub fn get_raw_secret<'a>(store_name: &str, entry_name: &str) -> Result<'static, Box<Entry>> {
+    let base_store_path = GlobalConfiguration::StoreDir.value().unwrap();
+    let store_hash = calculate_store_name_hash(store_name);
     let store_path = format!("{0}/{1}.json", base_store_path, store_hash);
 
     // Read data back to struct
     // Open the file in read-only mode with buffer.
     let file = File::open(Path::new(&store_path)).unwrap();
     let reader = BufReader::new(file);
-    let secret_entries: data_model::EntryStore = serde_json::from_reader(reader).unwrap();
+    let secret_entries: EntryStore = serde_json::from_reader(reader).unwrap();
 
     // Iterate through all entries and return an entry matching the entry name
     for entry in secret_entries.entries{
@@ -81,5 +94,5 @@ pub fn get_raw_secret<'a>(store_name: &str, entry_name: &str) -> errors::Result<
         }
     }
 
-    Err(errors::PasswordStoreError::ErrorEntryDoesNotExist)
+    Err(PasswordStoreError::ErrorEntryDoesNotExist)
 }

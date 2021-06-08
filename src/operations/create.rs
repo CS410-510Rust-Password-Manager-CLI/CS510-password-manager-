@@ -1,7 +1,4 @@
-use chrono::prelude::*;
-use std::path::{Path, PathBuf};
-use std::io::{self, Write};
-use std::fs::{create_dir_all, read_dir, write};
+use std::io::Write;
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 
@@ -9,42 +6,42 @@ use std::str;
 use text_io::read;
 use rpassword;
 
-use crate::common;
-use crate::errors;
+use crate::generic::common::{
+    calculate_store_name_hash,
+};
+use crate::generic::errors::{
+    Result,
+    PasswordStoreError
+};
+use crate::generic::encryption::{
+    encrypt_data_with_private_key,
+    create_new_rsa_private_key
+};
 
 //Uses the user passed store name to create a file in the .passmanager folder.
 // The file will contain a generated password, date created and user entered name.
 
 // Gather user info for new data entry
-pub fn create_menu(store_name: &str) -> errors::Result<'static, ()>{
+//TODO: Check if store exists first
+pub fn create_menu(store_name: &str) -> Result<'static, ()>{
     let entry_name: String = *get_entry_name();
     let username: String = *get_username();
     match get_password(){
         Ok(b) => {
             let password: String = *b;
-            let key_name = common::calculate_store_name_hash(&entry_name).to_string();
+            let key_name = calculate_store_name_hash(&entry_name).to_string();
             println!("The Entry name is: {}", entry_name);
             println!("The user name is: {}", username);
             println!("Pass: {}", password);
-            match common::create_new_rsa_private_key(&key_name){
+            match create_new_rsa_private_key(&key_name){
                 Ok(()) => {
                     // Once the key is successfully written, read the key and generate a pub key
                     // to encrypt and save to file
-                    let hashed_store_name = common::calculate_store_name_hash(store_name).to_string();
-                    common::encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name, &entry_name);
+                    let hashed_store_name = calculate_store_name_hash(store_name).to_string();
+                    encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name, &entry_name);
                     Ok(())
-                    // match common::encrypt_data_with_private_key(&key_name, &username, &password, &hashed_store_name){
-                    //     Ok(data_box) => {
-                    //         let encrypted_username = &*(data_box.0);
-                    //
-                    //         println!("{}", str::from_utf8(&encrypted_username).unwrap());
-                    //         Ok(())
-                    //         //println!("{}", str::from_utf8(encrypted_password).unwrap())
-                    //     }
-                    //     Err(e) => Err(errors::PasswordStoreError::ErrorDataEncryption),
-                    // }
                 },
-                Err(e) => Err(errors::PasswordStoreError::ErrorPrivateKeyGeneration),
+                Err(e) => Err(PasswordStoreError::ErrorPrivateKeyGeneration),
             }
         },
         Err(e) => Err(e),
@@ -76,7 +73,7 @@ pub fn get_username() -> Box<String>{
 // Read password from stdin twice
 // Verifies that the result is accurate before returning
 // If the passwords do not match, throw error
-pub fn get_password() -> errors::Result<'static, Box<String>>{
+pub fn get_password() -> Result<'static, Box<String>>{
     // Need to encrypt here
     let pass = rpassword::prompt_password_stdout("Password: ").unwrap();
     let pass_verify = rpassword::prompt_password_stdout("Password Verification: ").unwrap();
@@ -85,13 +82,8 @@ pub fn get_password() -> errors::Result<'static, Box<String>>{
         let b = Box::new(pass.clone());
         Ok(b)
     }else{
-        Err(errors::PasswordStoreError::ErrorMisMatchPasswordCreation)
+        Err(PasswordStoreError::ErrorMisMatchPasswordCreation)
     }
-}
-
-// low priority
-pub fn get_hint(){
-    todo!()
 }
 
 // Create function:
@@ -110,101 +102,4 @@ fn genpass(length: u32) -> String {
         .map(char::from)
         .collect();
     rand_string
-}
-
-// pub fn create(store_name: &str) {
-//     //Need a store name and then add secrets to that store
-//     //This can use the CLI Menu format that we had in the menu function
-//     //Can add option to allow auto generation of secrets or to allow a user to use their own
-//     let hdir = home::home_dir();
-//     match hdir {
-//         Some(path) => {
-//             let mut hdirfinal = path.display().to_string();
-//             hdirfinal.push_str("/.passmanager");
-//
-//             if !Path::new(&hdirfinal).is_dir() {
-//                 // Create dir if path doesn't exist
-//                 println!("Base path does not exist!");
-//                 let created = create_dir_all(&hdirfinal);
-//                 match created {
-//                     Ok(()) => println!("New base path created"),
-//                     Err(e) => println!("Error creating new path: {}", e),
-//                 }
-//             }
-//
-//             let files = read_dir(&hdirfinal).unwrap();
-//             for file in files {
-//                 if file.unwrap().file_name() == store_name {
-//                     println!("Store name already exists");
-//                     return;
-//                 }
-//             }
-//
-//             //store name does not already exist
-//             //creating path for new file
-//             let mut pathfilestring: String = "".to_owned();
-//             pathfilestring.push_str(&hdirfinal);
-//             pathfilestring.push('/');
-//             pathfilestring.push_str(store_name);
-//             pathfilestring.push_str(".txt");
-//
-//             let mut passfile = PathBuf::new();
-//             passfile.push(pathfilestring);
-//
-//             //get data for the store
-//             let file_data = file_data();
-//
-//             //create string to store in file
-//             let mut text = "test";
-//
-//             // text.push_str("id: ");
-//             // text.push_str(&file_data.id);
-//             // text.push_str("\n");
-//             // text.push_str("secret: ");
-//             // text.push_str(&file_data.pass);
-//             // text.push_str("\n");
-//             // text.push_str("date: ");
-//             // text.push_str(&file_data.date);
-//             // text.push_str("\n");
-//
-//             let written = write(path, text);
-//             match written {
-//                 Ok(()) => println!("Successfully written to file"),
-//                 Err(e) => println!("Unable to write to file: {}", e),
-//             }
-//         }
-//         None => {
-//             println!("Impossible to get your home dir!");
-//             return;
-//         }
-//     }
-// }
-
-struct FileData {
-    id: String,
-    pass: String,
-    date: String,
-}
-
-fn file_data() -> FileData {
-    let mut buffer = String::new();
-    print!("\nEnter name associated with data: ");
-    io::stdout().flush().unwrap();
-
-    //read user input
-    io::stdin()
-        .read_line(&mut buffer)
-        .expect("could not read input");
-
-    buffer.trim();
-
-    let name: String;
-    name = buffer;
-
-    let data = FileData {
-        pass: genpass(20),
-        id: name,
-        date: Utc::now().date().naive_utc().to_string(),
-    };
-    return data;
 }
