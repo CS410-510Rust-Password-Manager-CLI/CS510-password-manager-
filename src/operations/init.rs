@@ -74,7 +74,7 @@ pub fn setup(store_name: &str) -> Result<()> {
             return Err(e);
         }
     }
-
+    // Setup key store dirs if they do not exist
     if !key_store_dir_exist() {
         if let Err(e) = setup_key_store_dirs() {
             return Err(e);

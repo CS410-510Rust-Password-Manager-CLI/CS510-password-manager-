@@ -11,9 +11,7 @@ use crate::generic::encryption::{create_new_rsa_private_key, encrypt_data_with_p
 use crate::generic::errors::{PasswordStoreError, Result};
 use crate::models::data_model::{Entry, EntryStore};
 
-/**
-    Entry point for the create operation.
-**/
+// Entry Point for creating a new data entry
 pub fn create_entry_point(store_name: &str) -> Result<'static, ()> {
     // Check if the requested store exists
     if !does_store_exist(store_name) {
@@ -43,6 +41,7 @@ pub fn create_entry_point(store_name: &str) -> Result<'static, ()> {
     }
 }
 
+// Adds the new data to the specified store
 pub fn add_to_store<'a>(
     key_name: &str,
     username: &str,
@@ -79,6 +78,7 @@ pub fn add_to_store<'a>(
     }
 }
 
+// Encrypts the username and password with an RSA private key
 fn encrypt<'a>(
     key_name: &str,
     username: &str,

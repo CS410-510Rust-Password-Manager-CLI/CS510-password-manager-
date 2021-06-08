@@ -1,5 +1,6 @@
 use clap::{App, Arg};
 
+// Internal Libraries
 pub mod operations {
     pub mod create;
     pub mod delete;
@@ -19,6 +20,7 @@ pub mod generic {
     pub mod errors;
 }
 
+// Mock Library for unit testing
 pub mod mocks {
     pub mod test_mocks;
 }
@@ -30,9 +32,13 @@ pub fn main() {
         .author("Haohan Jiang <jiang4.pdx.edu>, Taraq Jallad <tajallad@pdx.edu>")
         .about(
             "Usage: \n\
-        To initialize a new store: password_manager <NAME> init\n\
-        To delete a secret from the store: password_manager <NAME> delete\n\
-        To add a secret to the store: password_manager <NAME> create\n",
+        To initialize a new store: password_manager -s <NAME> init\n\
+        To add a secret to the store: password_manager -s <NAME> create\n\
+        To list all secrets in a store: password_manager -s <NAME> list\n\
+        To delete a secrets store: password_manager -s <NAME> delete-store\n\
+        To delete an entry in a secrets store: password_manager -s <NAME> delete-entry -e <ENTRY_NAME>\n\
+        To modify an entry in a secrets store: password_manager -s <NAME> modify -e <ENTRY_NAME>\n\
+        To get an entry from the secrets store: password_manager -s <NAME> get -e <ENTRY_NAME>\n",
         )
         .arg(
             Arg::new("store_name")
@@ -62,7 +68,6 @@ pub fn main() {
 
     let store_name = matches.value_of("store_name").unwrap();
     if let Some(op) = matches.value_of("op") {
-        //TODO: Check all arguments are set
         match op {
             "init" => {
                 if let Err(e) = operations::init::setup(store_name) {

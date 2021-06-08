@@ -9,9 +9,7 @@ use std::io::BufReader;
 use std::path::Path;
 
 #[cfg(test)]
-use crate::mocks::test_mocks::{
-    home_dir
-};
+use crate::mocks::test_mocks::home_dir;
 
 // Global Configurations for the password manager
 pub enum GlobalConfiguration {
@@ -102,7 +100,7 @@ pub fn base_dir_exist() -> bool {
         Ok(_path) => {
             let result = Path::new(&_path).is_dir();
             result
-        },
+        }
         _ => false,
     }
 }
@@ -143,12 +141,11 @@ pub fn get_all_secrets(store_name: &str) -> Option<Box<EntryStore>> {
     let reader = BufReader::new(file);
     match serde_json::from_reader(reader) {
         Ok(secret_entries) => Some(Box::new(secret_entries)),
-        Err(_e) => {
-            None
-        }
+        Err(_e) => None,
     }
 }
 
+//Write entry_store to file
 pub fn write_to_file<'a>(entry_store: &EntryStore, hashed_store_name: &str) -> Result<'a, ()> {
     let serialized_data = serde_json::to_string(&entry_store).unwrap();
     let store_path = format!(
@@ -164,6 +161,7 @@ pub fn write_to_file<'a>(entry_store: &EntryStore, hashed_store_name: &str) -> R
     Ok(())
 }
 
+// Get the index that the entry_name exists at in the EntryStore
 pub fn get_index(entry_name: &str, store: &EntryStore) -> Option<Box<usize>> {
     let mut index: usize = 0;
     let mut found = false;
@@ -183,9 +181,10 @@ pub fn get_index(entry_name: &str, store: &EntryStore) -> Option<Box<usize>> {
     }
 }
 
+// Return a Vec of entry names that exist in the store: store_name
 pub fn get_entry_names(store_name: &str) -> Option<Vec<String>> {
-    match get_all_secrets(store_name){
-        Some(entry_store) =>{
+    match get_all_secrets(store_name) {
+        Some(entry_store) => {
             let mut entry_names = Vec::new();
             for entry in entry_store.entries {
                 entry_names.push(entry.name)
@@ -196,7 +195,7 @@ pub fn get_entry_names(store_name: &str) -> Option<Vec<String>> {
                 Some(entry_names)
             }
         }
-        None => None
+        None => None,
     }
 }
 

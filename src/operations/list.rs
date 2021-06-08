@@ -1,7 +1,6 @@
 use crate::generic::common::{does_store_exist, get_entry_names};
 use crate::generic::errors::{PasswordStoreError, Result};
 
-//todo: fix when no entires in store
 //List all secrets in a store
 pub fn list_all_entries(store_name: &str) -> Result<()> {
     if !does_store_exist(store_name) {
@@ -9,6 +8,8 @@ pub fn list_all_entries(store_name: &str) -> Result<()> {
         return Err(PasswordStoreError::ErrorStoreDoesNotExist);
     }
 
+    // Get a list of all entry names
+    // If none, return no data error
     match get_entry_names(store_name) {
         Some(entry_names) => {
             for name in entry_names.iter() {

@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+// Data is stored as an EntryStore
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct EntryStore {
     pub entries: Vec<Entry>,

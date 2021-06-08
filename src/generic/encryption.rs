@@ -84,7 +84,7 @@ pub fn encrypt_data_with_private_key(
     Ok(Box::new(new_entry))
 }
 
-// Gets a secret from the a secret store
+// Decrypts a secret from the secret store
 pub fn decrypt_secret(entry_name: &str, raw_entry: &Entry) -> std::io::Result<()> {
     let key_name = calculate_store_name_hash(entry_name);
     let key_file_path = format!(

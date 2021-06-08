@@ -11,6 +11,7 @@ pub fn display_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>
     }
 
     match get_raw_secret(store_name, entry_name) {
+        // Decypt the secret and display to console
         Some(raw_entry) => match decrypt_secret(entry_name, &(*raw_entry)) {
             Ok(()) => Ok(()),
             Err(e) => {
@@ -22,6 +23,8 @@ pub fn display_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>
     }
 }
 
+// Iterates through EntryStores and returns a Box of the raw, unencrypted secret
+// matching the entry_name
 fn get_raw_secret(store_name: &str, entry_name: &str) -> Option<Box<Entry>> {
     match get_all_secrets(store_name) {
         Some(secrets) => {
