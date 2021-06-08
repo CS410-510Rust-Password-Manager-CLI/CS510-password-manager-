@@ -136,12 +136,25 @@ mod tests {
     use crate::operations::init::*;
     use crate::generic::common::*;
     #[test]
-    fn test_setup() {
-        assert_eq!(setup("test123"), Ok(()));
-        assert!(setup("test123").is_err());
+    fn test_setup_delete() {
+        if does_store_exist("test1") || does_store_exist("test2") || does_store_exist("test3") || does_store_exist("test4"){
+            return;
+        }
+        assert_eq!(setup("test1"), Ok(()));
+        assert!(setup("test1").is_err());
         assert_eq!(base_dir_exist(), true);
         assert_eq!(store_dir_exist(), true);
         assert_eq!(key_store_dir_exist(), true);
-        delete_secret_store_test("test123").expect("unable to delete");
+        assert_eq!(delete_secret_store_test("test1"), Ok(()));
+        assert_eq!(setup("test2"), Ok(()));
+        assert_eq!(setup("test3"), Ok(()));
+        assert_eq!(setup("test4"), Ok(()));
+        assert_eq!(delete_secret_store_test("test2"), Ok(()));
+        assert_eq!(delete_secret_store_test("test3"), Ok(()));
+        assert_eq!(delete_secret_store_test("test4"), Ok(()));
+        assert_eq!(does_store_exist("test1"), false);
+        assert_eq!(does_store_exist("test2"), false);
+        assert_eq!(does_store_exist("test3"), false);
+        assert_eq!(does_store_exist("test4"), false);
     }
 }
