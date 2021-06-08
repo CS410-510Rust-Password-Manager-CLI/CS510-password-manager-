@@ -40,7 +40,7 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
 
     let verified = buffer.trim();
     if verified != store_name {
-        return Err(PasswordStoreError::ErrorMisMatchStoreName);
+        return Err(PasswordStoreError::ErrorMisMatchStoreName)
     }
 
     //delete the file
@@ -55,6 +55,14 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
 }
 
 // Deletes a secret store
-pub fn delete_secret(){
-    todo!()
+pub fn delete_secret(store_name: &str, entry_name: &str){
+    // Check if this store exists, if not return error
+    // Get all secrets from this specific store
+    // Make a copy
+    // Iterate through and find the specific entry we want to delete
+    //      ex: look at get_raw_secret() in get.rs
+    // Delete
+    // Once we have the correct secret, delete it from the EntryStore data object
+    // -------------------------------------------------
+    // Write the EntryStore data object back to the disk
 }
