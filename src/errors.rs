@@ -24,9 +24,11 @@ pub enum PasswordStoreError<'a> {
     #[error("Store directory does not exist")]
     ErrorStoreDir,
     #[error("Store does not exist")]
-    ErrorStoreExist,
+    ErrorStoreDoesNotExist,
     #[error("Entered store names do not match! Store names must match to delete an entry")]
     ErrorMisMatchStoreName,
+    #[error("Entered entry name does not exist in this store!")]
+    ErrorEntryDoesNotExist,
 }
 
 pub type Result<'a, T> = std::result::Result<T, PasswordStoreError<'a>>;

@@ -113,6 +113,17 @@ pub fn key_store_dir_exist() -> bool {
     }
 }
 
+// Check if specific store exists
+// Hashes store name and checks if the store name the user input can be created
+pub fn does_store_exist(store_name: &str) -> bool{
+    let store_hash = calculate_store_name_hash(store_name);
+    let store_base_path = GlobalConfiguration::StoreDir.value().unwrap();
+    let store_path: &str = &format!("{0}/{1}.json", store_base_path, store_hash);
+    return Path::new(store_path).exists()
+}
+
+//TODO: Move below to different file
+
 // Creates a new RSA private key for every password entry
 // Saves private key to pem file stored in the .keys
 // Key name is based on the hashed value of the entry name
@@ -135,9 +146,9 @@ pub fn encrypt_data_with_private_key(
     key_name: &str,
     username: &str,
     password: &str,
-    store_name: &str,
+    hashed_store_name: &str,
     entry_name: &str,
-) {
+) -> std::io::Result<()> {
     let key_file_path = format!(
         "{}/{}.pem",
         GlobalConfiguration::KeyStoreDir.value().unwrap(),
@@ -173,32 +184,25 @@ pub fn encrypt_data_with_private_key(
             password.as_bytes(),
         )
         .expect("failed to encrypt password");
-    let enc_data = pub_key
-        .encrypt(
-            &mut rng,
-            PaddingScheme::new_pkcs1v15_encrypt(),
-            username.as_bytes(),
-        )
-        .expect("failed to encrypt");
 
-    //Write encrypted data to store file
-    let store_path = format!(
-        "{0}/{1}.json",
-        GlobalConfiguration::StoreDir.value().unwrap(),
-        store_name
-    );
-    let mut store_file = File::open(store_path);
+    // Need to read in current entries
+    let mut new_store = data_model::EntryStore::new();
 
-    println!("{}", str::from_utf8(&enc_username_data).unwrap());
+    // Create new data entry from encrypted data
+    let new_entry = data_model::Entry{
+        name: entry_name.to_string(),
+        username: enc_username_data,
+        password: enc_password_data,
+    };
 
-    //Write encrypted data to store file
-    // let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), store_name);
-    // let mut store_file = File::open(store_path)?;
-    //
-    // let new_entry = data_model::Entry{
-    //     name: entry_name.to_string(),
-    //
-    // }
+    new_store.entries.push(new_entry);
 
-    //Ok()
+    let serialized_data = serde_json::to_string(&new_store).unwrap();
+    let store_path = format!("{0}/{1}.json", GlobalConfiguration::StoreDir.value().unwrap(), hashed_store_name);
+    println!("Path: {}", store_path);
+    println!("Data: {}", serialized_data);
+    let mut store_file = File::create(Path::new(&store_path)).unwrap();
+    serde_json::to_writer(store_file, &new_store).unwrap();
+    println!("Saved!");
+    Ok(())
 }

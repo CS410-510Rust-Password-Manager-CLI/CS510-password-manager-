@@ -14,11 +14,14 @@ pub fn delete_secret_store(store_name: &str) -> errors::Result<'static, ()>{
     // Throw error if user inputs store name wrong in verify
     // Print UserMessage on successful deletion
 
+
     //check if store directory exists
     match common::store_dir_exist() {
-        false => return Err(errors::PasswordStoreError::ErrorStoreDir),
+        false => return Err(errors::PasswordStoreError::ErrorStoreDoesNotExist),
         true => (),
     }
+
+    //TODO: Check that the specific story to delete exists
 
     //hash the store name
     let hash_store_name = common::calculate_store_name_hash(store_name);
@@ -41,7 +44,8 @@ pub fn delete_secret_store(store_name: &str) -> errors::Result<'static, ()>{
 
     //delete the file
     match fs::remove_file(file_path) {
-        Err(_e) => return Err(errors::PasswordStoreError::ErrorStoreExist),
+        // TODO: Fix this
+        Err(_e) => return Err(errors::PasswordStoreError::ErrorStoreDoesNotExist),
         Ok(_a) => {
             println!("{}", UserMessage::DeletedEntrySuccessfully.value());
             Ok(())

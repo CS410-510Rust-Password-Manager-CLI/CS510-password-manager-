@@ -1,10 +1,20 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default, Clone)]
+pub struct EntryStore{
+    pub entries: Vec<Entry>
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Entry {
-    name: String,
-    username: String, //encrypted
-    password: String, //encrypted
-    hint: String,
+    pub name: String,
+    pub username: Vec<u8>, //encrypted
+    pub password: Vec<u8>, //encrypted
+}
+
+impl EntryStore{
+    pub fn new() -> Self{
+        Self::default()
+    }
 }

@@ -64,10 +64,18 @@ fn main() {
                 )
                 .takes_value(true),
         )
+        .arg(
+            Arg::new("entry_name")
+                .short('e')
+                .long("entry_name")
+                .about("Entry name for operation<op>.")
+                .takes_value(true),
+        )
         .get_matches();
 
     let store_name = matches.value_of("store_name").unwrap();
     if let Some(op) = matches.value_of("op") {
+        //TODO: Check all arguments are set
         match op {
             "init" => {
                 if let Err(e) = operations::init::setup(store_name) {
@@ -88,7 +96,13 @@ fn main() {
                     std::process::exit(1);
                 }
             }
-            "get" => println!("get"),
+            "get" => {
+                let entry_name= matches.value_of("entry_name").unwrap();
+                if let Err(e) = operations::get::display_secret(store_name, entry_name){
+                    println!("{}", e);
+                    std::process::exit(1);
+                }
+            },
             "modify" => println!("modify!"),
             _ => println!("Must enter a valid operation"),
         }
