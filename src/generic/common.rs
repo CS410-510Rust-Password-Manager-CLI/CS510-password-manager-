@@ -10,8 +10,7 @@ use std::path::Path;
 
 #[cfg(test)]
 use crate::mocks::test_mocks::{
-    home_dir,
-    is_dir
+    home_dir
 };
 
 // Global Configurations for the password manager
@@ -144,7 +143,7 @@ pub fn get_all_secrets(store_name: &str) -> Option<Box<EntryStore>> {
     let reader = BufReader::new(file);
     match serde_json::from_reader(reader) {
         Ok(secret_entries) => Some(Box::new(secret_entries)),
-        Err(e) => {
+        Err(_e) => {
             None
         }
     }
