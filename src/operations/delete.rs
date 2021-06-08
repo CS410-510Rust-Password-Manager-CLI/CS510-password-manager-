@@ -99,3 +99,47 @@ fn clean_up_rsa_keys(key_names: Vec<String>) -> Result<'static, ()>{
 
     Ok(())
 }
+
+#[cfg(test)]
+fn delete_secret_store_test(store_name: &str) -> Result<'static, ()> {
+    // Hash store name, find file, verify, delete
+    // Throw error if user inputs store name wrong in verify
+    // Print UserMessage on successful deletion
+
+    if !does_store_exist(store_name) {
+        return Err(PasswordStoreError::ErrorStoreDoesNotExist);
+    }
+
+    //hash the store name
+    let hash_store_name = calculate_store_name_hash(store_name);
+
+    //get file path of hashed store name
+    let file_path = format!(
+        "{}/{}.json",
+        GlobalConfiguration::StoreDir.value().unwrap(),
+        hash_store_name
+    );
+
+    //delete the file
+    match fs::remove_file(file_path) {
+        Err(_e) => return Err(PasswordStoreError::ErrorStoreDoesNotExist),
+        Ok(_a) => {
+            println!("{}", UserMessage::DeletedEntrySuccessfully.value());
+            Ok(())
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::operations::init::*;
+    use crate::generic::common::*;
+    #[test]
+    fn test_setup() {
+        assert_eq!(setup("test123"), Ok(()));
+        assert!(setup("test123").is_err());
+        assert_eq!(base_dir_exist(), true);
+        delete_secret_store_test("test123").expect("unable to delete");
+    }
+}
