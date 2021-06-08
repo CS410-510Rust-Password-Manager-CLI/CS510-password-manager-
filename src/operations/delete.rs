@@ -8,7 +8,7 @@ use std::io;
 use std::io::Write;
 
 
-//Todo: Clean up RSA private keys
+//Todo: Clean up RSA private keys after entry or store deletion
 
 // Deletes a secret from a secret store
 // When deleting secret store, verify the store name before deleting

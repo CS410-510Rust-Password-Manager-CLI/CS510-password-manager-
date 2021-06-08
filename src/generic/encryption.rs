@@ -41,7 +41,7 @@ pub fn encrypt_data_with_private_key(
     );
     let mut file = File::open(key_file_path).unwrap();
     let mut priv_key_buf = String::new();
-    file.read_to_string(&mut priv_key_buf);
+    file.read_to_string(&mut priv_key_buf)?;
 
     // Source: From example of how to read into memory PEM file as PKCS1
     let der_encoded = priv_key_buf
@@ -94,7 +94,7 @@ pub fn decrypt_secret(entry_name: &str, raw_entry: &Entry) -> std::io::Result<()
     );
     let mut file = File::open(key_file_path).unwrap();
     let mut priv_key_buf = String::new();
-    file.read_to_string(&mut priv_key_buf);
+    file.read_to_string(&mut priv_key_buf)?;
 
     let der_encoded = priv_key_buf
         .lines()
