@@ -1,6 +1,6 @@
-# -CS510-password-manager-
-Rust Password Manager CLI
+# Password Manager CLI
+Authors: Tareq Jallad, David Jiang  
 
-Authors: Tareq Jallad, David Jiang 
-
-# *need to fix base folder creation* - FIXED!
+## License  
+This project is available under the 
+[MIT license](https://github.com/CS410-510Rust-Password-Manager-CLI/CS510-password-manager-/blob/main/LICENSE)
