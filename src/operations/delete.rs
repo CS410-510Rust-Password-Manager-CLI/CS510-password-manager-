@@ -1,18 +1,20 @@
-use crate::generic::common::{calculate_store_name_hash, does_store_exist, get_all_secrets, write_to_file, GlobalConfiguration, UserMessage, get_index, get_entry_names};
+use crate::generic::common::{
+    calculate_store_name_hash, does_store_exist, get_all_secrets, get_entry_names, get_index,
+    write_to_file, GlobalConfiguration, UserMessage,
+};
 use crate::generic::errors::{PasswordStoreError, Result};
 use std::fs::remove_file;
-use std::io;
-use std::io::Write;
+use std::io::{stdin, stdout, Write};
 
 // Delete a secret store
 // Delete entry by entry before deleting store to ensure that all
 // RSA private keys and cleaned up and that password file can be
 // restored in case of error
-pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
+pub fn delete_secret_store(store_name: &str) -> Result<'static, ()> {
     let mut buffer = String::new();
     print!("\nEnter storename again to verify: ");
-    io::stdout().flush().unwrap();
-    io::stdin()
+    stdout().flush().unwrap();
+    stdin()
         .read_line(&mut buffer)
         .expect("could not read input");
 
@@ -21,34 +23,36 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()>{
         return Err(PasswordStoreError::ErrorMisMatchStoreName);
     }
 
-    match get_entry_names(store_name){
+    match get_entry_names(store_name) {
         Some(entry_names) => {
-            for name in entry_names.iter(){
-                if let Err(e) = delete_entry(store_name, name){
-                    return Err(e)
+            for name in entry_names.iter() {
+                if let Err(e) = delete_entry(store_name, name) {
+                    return Err(e);
                 }
             }
             //hash the store name
             let hash_store_name = calculate_store_name_hash(store_name);
 
             //get file path of hashed store name
-            let file_path = format!("{}/{}.json",
+            let file_path = format!(
+                "{}/{}.json",
                 GlobalConfiguration::StoreDir.value().unwrap(),
-                hash_store_name);
+                hash_store_name
+            );
 
             //delete the store file
             match remove_file(file_path) {
                 Err(e) => {
                     println!("{}", e.to_string());
-                    return Err(PasswordStoreError::ErrorStoreDoesNotExist)
-                },
+                    Err(PasswordStoreError::ErrorStoreDoesNotExist)
+                }
                 Ok(()) => {
                     println!("{}", UserMessage::DeletedEntrySuccessfully.value());
                     Ok(())
                 }
             }
         }
-        None => Err(PasswordStoreError::ErrorNoStoreName)
+        None => Err(PasswordStoreError::ErrorNoStoreName),
     }
 }
 
@@ -64,9 +68,8 @@ pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
     let failback_copy = get_all_secrets(store_name).unwrap();
     let mut all_secrets_final = get_all_secrets(store_name).unwrap();
 
-
     let store_hash = calculate_store_name_hash(store_name).to_string();
-    match get_index(entry_name, &(*all_secrets_final)){
+    match get_index(entry_name, &(*all_secrets_final)) {
         Some(index) => {
             // Get name of entry being removed
             //remove entry from entries vector where name matches, if match found
@@ -75,38 +78,38 @@ pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
                 Ok(()) => {
                     // If removal is successful, delete the RSA pem key
                     let hashed_entry_name = calculate_store_name_hash(entry_name).to_string();
-                    match clean_up_rsa_keys(&hashed_entry_name){
+                    match clean_up_rsa_keys(&hashed_entry_name) {
                         Ok(()) => {
                             println!("{}", UserMessage::DeletedEntrySuccessfully.value());
                             Ok(())
                         }
                         // If key removal fails, restore to original
-                        Err(e) => {
-                            match write_to_file(&failback_copy, &store_hash) {
-                                Ok(()) => Err(e),
-                                Err(e) => Err(e)
-                            }
-                        }
+                        Err(e) => match write_to_file(&failback_copy, &store_hash) {
+                            Ok(()) => Err(e),
+                            Err(e) => Err(e),
+                        },
                     }
-                },
-                Err(e) => Err(e)
+                }
+                Err(e) => Err(e),
             }
         }
         None => {
             // If anything goes wrong, failback to original copy
             match write_to_file(&failback_copy, &store_hash) {
                 Ok(()) => Err(PasswordStoreError::ErrorNoEntryNameMatch),
-                Err(e) => Err(e)
+                Err(e) => Err(e),
             }
         }
     }
 }
 
 // Clean up RSA keys of deleted entries
-fn clean_up_rsa_keys(key_name: &str) -> Result<'static, ()>{
-    let key_path = format!("{}/{}.json",
-                           GlobalConfiguration::KeyStoreDir.value().unwrap(),
-                           key_name);
+fn clean_up_rsa_keys(key_name: &str) -> Result<'static, ()> {
+    let key_path = format!(
+        "{}/{}.json",
+        GlobalConfiguration::KeyStoreDir.value().unwrap(),
+        key_name
+    );
     if let Err(e) = remove_file(key_path) {
         println!("{}", e.to_string());
         return Err(PasswordStoreError::ErrorRSAKeyDelete);

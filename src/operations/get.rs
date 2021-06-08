@@ -11,20 +11,18 @@ pub fn display_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>
     }
 
     match get_raw_secret(store_name, entry_name) {
-        Some(raw_entry) => {
-            match decrypt_secret(entry_name, &(*raw_entry)){
-                Ok(()) => Ok(()),
-                Err(e) => {
-                    println!("{}", e.to_string());
-                    Err(PasswordStoreError::ErrorDataEncryption)
-                }
+        Some(raw_entry) => match decrypt_secret(entry_name, &(*raw_entry)) {
+            Ok(()) => Ok(()),
+            Err(e) => {
+                println!("{}", e.to_string());
+                Err(PasswordStoreError::ErrorDataEncryption)
             }
-        }
+        },
         None => Err(PasswordStoreError::ErrorEntryDoesNotExist),
     }
 }
 
-fn get_raw_secret<'a>(store_name: &str, entry_name: &str) -> Option<Box<Entry>> {
+fn get_raw_secret(store_name: &str, entry_name: &str) -> Option<Box<Entry>> {
     match get_all_secrets(store_name) {
         Some(secrets) => {
             // Iterate through all entries and return an entry matching the entry name

@@ -46,7 +46,7 @@ pub fn encrypt_data_with_private_key(
     // Source: From example of how to read into memory PEM file as PKCS1
     let der_encoded = priv_key_buf
         .lines()
-        .filter(|line| !line.starts_with("-"))
+        .filter(|line| !line.starts_with('-'))
         .fold(String::new(), |mut data, line| {
             data.push_str(&line);
             data
@@ -98,7 +98,7 @@ pub fn decrypt_secret(entry_name: &str, raw_entry: &Entry) -> std::io::Result<()
 
     let der_encoded = priv_key_buf
         .lines()
-        .filter(|line| !line.starts_with("-"))
+        .filter(|line| !line.starts_with('-'))
         .fold(String::new(), |mut data, line| {
             data.push_str(&line);
             data

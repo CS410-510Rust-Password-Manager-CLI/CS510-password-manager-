@@ -109,6 +109,5 @@ fn main() {
         }
     } else {
         println!("Must enter an operation");
-        return;
     }
 }

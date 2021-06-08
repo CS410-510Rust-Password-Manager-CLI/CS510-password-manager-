@@ -1,12 +1,11 @@
 use std::io::Write;
 
-use rpassword;
 use std::str;
 use text_io::read;
 
 // Internal libraries
 use crate::generic::common::{
-    calculate_store_name_hash, does_store_exist, get_all_secrets, write_to_file,
+    calculate_store_name_hash, does_store_exist, get_all_secrets, write_to_file, UserMessage,
 };
 use crate::generic::encryption::{create_new_rsa_private_key, encrypt_data_with_private_key};
 use crate::generic::errors::{PasswordStoreError, Result};
@@ -30,7 +29,13 @@ pub fn create_entry_point(store_name: &str) -> Result<'static, ()> {
             let password: String = *b;
             let key_name = calculate_store_name_hash(&entry_name).to_string();
             match add_to_store(&key_name, &username, &password, store_name, &entry_name) {
-                Ok(()) => Ok(()),
+                Ok(()) => {
+                    println!(
+                        "{}",
+                        UserMessage::CreatedEntrySuccessfully(&entry_name).value()
+                    );
+                    Ok(())
+                }
                 Err(e) => Err(e),
             }
         }
@@ -104,9 +109,7 @@ fn get_entry_name() -> Box<String> {
     println!("Enter a name for this new entry: ");
     let entry_name: String = read!("{}\n");
     std::io::stdout().flush().unwrap();
-    // String does not implement clone trait, must clone explicitly
-    let b = Box::new(entry_name.clone());
-    return b;
+    Box::new(entry_name)
 }
 
 // Read from stdin for the username
@@ -115,9 +118,7 @@ pub fn get_username() -> Box<String> {
     println!("Username: ");
     let username: String = read!("{}\n");
     std::io::stdout().flush().unwrap();
-    // String does not implement clone trait, must clone explicitly
-    let b = Box::new(username.clone());
-    return b;
+    Box::new(username)
 }
 
 // Read password from stdin twice
@@ -129,8 +130,7 @@ pub fn get_password() -> Result<'static, Box<String>> {
     let pass_verify = rpassword::prompt_password_stdout("Password Verification: ").unwrap();
 
     if pass == pass_verify {
-        let b = Box::new(pass.clone());
-        Ok(b)
+        Ok(Box::new(pass))
     } else {
         Err(PasswordStoreError::ErrorMisMatchPasswordCreation)
     }

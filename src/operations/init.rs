@@ -20,7 +20,7 @@ fn setup_base_dirs() -> Result<'static, ()> {
         Ok(()) => {
             println!("{}", UserMessage::CreatedBaseDir.value());
             Ok(())
-        },
+        }
         Err(e) => {
             println!("{:?}", e);
             Err(PasswordStoreError::ErrorCreatingBasePath)
@@ -32,11 +32,11 @@ fn setup_base_dirs() -> Result<'static, ()> {
 // Returns an error if the dir cannot be created
 fn setup_store_dirs() -> Result<'static, ()> {
     let base_path = GlobalConfiguration::StoreDir.value().unwrap();
-    match create_dir_all(&base_path){
+    match create_dir_all(&base_path) {
         Ok(()) => {
             println!("{}", UserMessage::CreatedStoreDir.value());
             Ok(())
-        },
+        }
         Err(e) => {
             println!("{:?}", e);
             Err(PasswordStoreError::ErrorCreatingStorePath)
@@ -52,7 +52,7 @@ fn setup_key_store_dirs() -> Result<'static, ()> {
         Ok(()) => {
             println!("{}", UserMessage::CreatedKeyStoreDir.value());
             Ok(())
-        },
+        }
         Err(e) => {
             println!("{}", e.to_string());
             Err(PasswordStoreError::ErrorCreatingStorePath)
@@ -64,20 +64,20 @@ fn setup_key_store_dirs() -> Result<'static, ()> {
 pub fn setup(store_name: &str) -> Result<()> {
     // Setup base dirs if they do not exist
     if !base_dir_exist() {
-        if let Err(e) = setup_base_dirs(){
-            return Err(e)
+        if let Err(e) = setup_base_dirs() {
+            return Err(e);
         }
     }
     // Setup store dirs if they do not exist
     if !store_dir_exist() {
-        if let Err(e) = setup_store_dirs(){
-            return Err(e)
+        if let Err(e) = setup_store_dirs() {
+            return Err(e);
         }
     }
 
     if !key_store_dir_exist() {
         if let Err(e) = setup_key_store_dirs() {
-            return Err(e)
+            return Err(e);
         }
     }
     // Return error if this store name already exists
@@ -85,16 +85,17 @@ pub fn setup(store_name: &str) -> Result<()> {
         return Err(PasswordStoreError::PasswordStoreExists(store_name));
     }
 
+    println!("{}", UserMessage::CreatingNewStore(store_name).value());
     //creating path for new file
     let base_store_path = GlobalConfiguration::StoreDir.value().unwrap();
     let store_hash = calculate_store_name_hash(store_name);
     let new_store_path = format!("{0}/{1}.json", base_store_path, store_hash);
 
-    match File::create(new_store_path){
+    match File::create(new_store_path) {
         Ok(_) => {
             println!("{}", UserMessage::StoreCreationSuccessful.value());
             Ok(())
-        },
+        }
         Err(e) => {
             println!("{}", e.to_string());
             Err(PasswordStoreError::ErrorCouldNotCreateStore)

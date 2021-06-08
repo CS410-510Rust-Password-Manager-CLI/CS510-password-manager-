@@ -22,8 +22,6 @@ pub enum PasswordStoreError<'a> {
     ErrorPrivateKeyGeneration,
     #[error("Could not encrypt data")]
     ErrorDataEncryption,
-    #[error("Store directory does not exist")]
-    ErrorStoreDir,
     #[error("Entry does not exist")]
     ErrorStoreEntryDoesNotExist,
     #[error("Store does not exist")]

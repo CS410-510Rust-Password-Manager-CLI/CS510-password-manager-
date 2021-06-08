@@ -37,7 +37,7 @@ impl GlobalConfiguration {
                     }
                 }
             }
-            None => return Err(PasswordStoreError::HomeDirError),
+            None => Err(PasswordStoreError::HomeDirError),
         }
     }
 }
@@ -55,7 +55,7 @@ pub enum UserMessage<'a> {
     // Inform user that key store directory has been created
     CreatedKeyStoreDir,
     // Inform user that new entry has been successfully saved into the manager
-    CreatedEntrySuccessfully,
+    CreatedEntrySuccessfully(&'a str),
     // Inform user that entry has been successfully deleted from the manager
     DeletedEntrySuccessfully,
 }
@@ -72,7 +72,13 @@ impl UserMessage<'_> {
             UserMessage::CreatedBaseDir => "Base dir created!".to_string(),
             UserMessage::CreatedStoreDir => "Base store dir created!".to_string(),
             UserMessage::CreatedKeyStoreDir => "Base Key store dir created!".to_string(),
-            UserMessage::CreatedEntrySuccessfully => "Entry created successfully!".to_string(),
+            UserMessage::CreatedEntrySuccessfully(entry_name) => {
+                message.push_str(&format!(
+                    "Entry created successfully with name: {}",
+                    entry_name
+                ));
+                message
+            }
             UserMessage::DeletedEntrySuccessfully => "Entry deleted successfully!".to_string(),
         }
     }
@@ -119,7 +125,7 @@ pub fn does_store_exist(store_name: &str) -> bool {
 }
 
 // Get all secrets from specific store
-pub fn get_all_secrets<'a>(store_name: &str) -> Option<Box<EntryStore>> {
+pub fn get_all_secrets(store_name: &str) -> Option<Box<EntryStore>> {
     let base_store_path = GlobalConfiguration::StoreDir.value().unwrap();
     let store_hash = calculate_store_name_hash(store_name);
     let store_path = format!("{0}/{1}.json", base_store_path, store_hash);
@@ -152,12 +158,12 @@ pub fn write_to_file<'a>(entry_store: &EntryStore, hashed_store_name: &str) -> R
     Ok(())
 }
 
-pub fn get_index(entry_name: &str, store: &EntryStore) -> Option<Box<usize>>{
+pub fn get_index(entry_name: &str, store: &EntryStore) -> Option<Box<usize>> {
     let mut index: usize = 0;
     let mut found = false;
 
     //loop through entries to find matching name
-    for entry in &(*store).entries{
+    for entry in &(*store).entries {
         if entry.name == entry_name {
             found = true;
             break;
@@ -171,16 +177,16 @@ pub fn get_index(entry_name: &str, store: &EntryStore) -> Option<Box<usize>>{
     }
 }
 
-pub fn get_entry_names(store_name: &str) -> Option<Box<Vec<String>>>{
+pub fn get_entry_names(store_name: &str) -> Option<Vec<String>> {
     let entry_store = *get_all_secrets(store_name).unwrap();
     let mut entry_names = Vec::new();
-    for entry in entry_store.entries{
-       entry_names.push(entry.name)
+    for entry in entry_store.entries {
+        entry_names.push(entry.name)
     }
 
-    if entry_names.is_empty(){
+    if entry_names.is_empty() {
         None
-    }else{
-        Some(Box::new(entry_names))
+    } else {
+        Some(entry_names)
     }
 }
