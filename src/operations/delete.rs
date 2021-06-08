@@ -7,6 +7,9 @@ use std::fs;
 use std::io;
 use std::io::Write;
 
+
+//Todo: Clean up RSA private keys
+
 // Deletes a secret from a secret store
 // When deleting secret store, verify the store name before deleting
 pub fn delete_secret_store(store_name: &str) -> Result<'static, ()> {
@@ -62,19 +65,20 @@ pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
     // Once we have the correct secret, delete it from the EntryStore data object
     // -------------------------------------------------
     // Write the EntryStore data object back to the disk
+    // If anything goes wrong, write the copy back to file
 
     if !does_store_exist(store_name) {
         return Err(PasswordStoreError::ErrorStoreDoesNotExist);
     }
 
-    let all_secrets = get_all_secrets(store_name).unwrap();
+    let failback_copy = get_all_secrets(store_name).unwrap();
     let mut all_secrets_final = get_all_secrets(store_name).unwrap();
 
     let mut count = 0;
     let mut found = false;
 
     //loop through entries to find matching name
-    for entry in all_secrets.entries {
+    for entry in &all_secrets_final.entries {
         if entry.name == entry_name {
             found = true;
             break;
@@ -86,7 +90,9 @@ pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
     if found {
         all_secrets_final.entries.remove(count);
     } else {
-        return Err(PasswordStoreError::ErrorNoEntryNameMatch);
+        write_to_file(&failback_copy,
+                      &calculate_store_name_hash(entry_name).to_string());
+        return Err(PasswordStoreError::ErrorNoEntryNameMatch)
     }
 
     let store_hash = calculate_store_name_hash(store_name).to_string();

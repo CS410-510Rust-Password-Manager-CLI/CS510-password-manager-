@@ -40,7 +40,7 @@ pub fn create_entry_point(store_name: &str) -> Result<'static, ()> {
     }
 }
 
-fn add_to_store<'a>(
+pub fn add_to_store<'a>(
     key_name: &str,
     username: &str,
     password: &str,
@@ -104,8 +104,8 @@ fn encrypt<'a>(
 // Return a Box with the entry name
 fn get_entry_name() -> Box<String> {
     println!("Enter a name for this new entry: ");
-    std::io::stdout().flush().unwrap();
     let entry_name: String = read!("{}\n");
+    std::io::stdout().flush().unwrap();
     // String does not implement clone trait, must clone explicitly
     let b = Box::new(entry_name.clone());
     return b;
@@ -113,10 +113,10 @@ fn get_entry_name() -> Box<String> {
 
 // Read from stdin for the username
 // Return a Box with the username
-fn get_username() -> Box<String> {
+pub fn get_username() -> Box<String> {
     println!("Username: ");
-    std::io::stdout().flush().unwrap();
     let username: String = read!("{}\n");
+    std::io::stdout().flush().unwrap();
     // String does not implement clone trait, must clone explicitly
     let b = Box::new(username.clone());
     return b;
@@ -126,7 +126,7 @@ fn get_username() -> Box<String> {
 // Verifies that the result is accurate before returning
 // Stdin input is not revealed on the command line
 // If the passwords do not match, throw error
-fn get_password() -> Result<'static, Box<String>> {
+pub fn get_password() -> Result<'static, Box<String>> {
     let pass = rpassword::prompt_password_stdout("Password: ").unwrap();
     let pass_verify = rpassword::prompt_password_stdout("Password Verification: ").unwrap();
 

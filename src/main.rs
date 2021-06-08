@@ -94,7 +94,7 @@ fn main() {
             }
             "modify" => {
                 let entry_name = matches.value_of("entry_name").unwrap();
-                if let Err(e) = operations::get::display_secret(store_name, entry_name) {
+                if let Err(e) = operations::modify::modify_entry(store_name, entry_name) {
                     println!("{}", e);
                     std::process::exit(1);
                 }

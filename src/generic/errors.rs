@@ -1,5 +1,4 @@
 // Contains Error Classes for use through the app
-
 #![allow(clippy::result_unit_err)]
 use thiserror::Error;
 
