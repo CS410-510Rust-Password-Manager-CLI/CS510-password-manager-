@@ -140,6 +140,8 @@ mod tests {
         assert_eq!(setup("test123"), Ok(()));
         assert!(setup("test123").is_err());
         assert_eq!(base_dir_exist(), true);
+        assert_eq!(store_dir_exist(), true);
+        assert_eq!(key_store_dir_exist(), true);
         delete_secret_store_test("test123").expect("unable to delete");
     }
 }
