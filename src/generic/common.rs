@@ -4,7 +4,10 @@ use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 use std::fs::File;
 
-use crate::generic::errors::Result;
+use crate::generic::errors::{
+    Result,
+    PasswordStoreError
+};
 
 use crate::models::data_model::{
     Entry,
@@ -40,7 +43,7 @@ impl GlobalConfiguration {
                     }
                 }
             }
-            None => return Err(super::errors::PasswordStoreError::HomeDirError),
+            None => return Err(PasswordStoreError::HomeDirError),
         }
     }
 }
