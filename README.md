@@ -62,7 +62,7 @@ Binary can also be downloaded from the [release page](https://github.com/CS410-5
 ### Get an existing entry in a secrets store
         password_manager -s <NAME> --op get -e <ENTRY_NAME>
 
-## Detailed guide:
+## Detailed guide
 ### Directory structure
 #### Top level `main.rs`
 The entry point for the application. Houses command line argument logic and calls different
