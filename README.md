@@ -13,6 +13,7 @@ Authors: Tareq Jallad, Haohan Jiang
   - [Delete a secret entry in a secrets store](#delete-a-secret-entry-in-a-secrets-store)
   - [Modify an existing entry in a secrets store](#modify-an-existing-entry-in-a-secrets-store)
   - [Get an existing entry in a secrets store](#get-an-existing-entry-in-a-secrets-store)
+- [Usage Example](#usage-example)
 - [Detailed guide](#detailed-guide)
   - [Directory structure](#directory-structure)
   - [Home directory for application](#home-directory-for-application)
@@ -61,6 +62,25 @@ Binary can also be downloaded from the [release page](https://github.com/CS410-5
 
 ### Get an existing entry in a secrets store
         password_manager -s <NAME> --op get -e <ENTRY_NAME>
+
+## Usage Example
+As a new user, I want to create new store with the name `foobar`. I have a new World of Warcraft subscription and 
+want to put my username and password into this password manager to store. 
+
+I would first need to create the store with:
+
+        password_manager -s foobar --op init
+
+Then, to add the user information into the password manager, I would need to run:
+
+        password_manager -s foobar --op create
+
+This will prompt the user to enter in a name for the secret entry and the username and password to store. In this 
+example, my store name will be called `wow`.
+
+When I want to login to World of Warcraft, I can get the secrets with:
+
+      password_manager -s foobar --op get -e wow
 
 ## Detailed guide
 ### Directory structure
