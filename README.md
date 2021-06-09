@@ -22,6 +22,7 @@ Authors: Tareq Jallad, Haohan Jiang
   - [Error handling](#error-handling)
 - [Testing](#testing)
 - [Post-project retrospective](#post-project-retrospective)
+- [License](#license)
 
 ## Description
 This project uses Rust to implement a command line password manager. This CLI application allows the user to
