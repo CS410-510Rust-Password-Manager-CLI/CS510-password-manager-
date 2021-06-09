@@ -1,4 +1,4 @@
-use crate::generic::common::{calculate_store_name_hash, GlobalConfiguration};
+use crate::generic::common::{calculate_store_name_hash, GlobalConfiguration, UserMessage};
 use crate::models::data_model::Entry;
 
 use rand::rngs::OsRng;
@@ -10,6 +10,7 @@ use std::io::{Read, Write};
 // Saves the created private key to a pem file stored in the .keys
 // Pem file name is based on the hashed value of the entry name
 pub fn create_new_rsa_private_key(key_name: &str) -> std::io::Result<()> {
+    println!("{}", UserMessage::CreatingNewPrivateKey.value());
     let mut rng = OsRng;
     let bits = 2048;
     let priv_key = RSAPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
@@ -23,6 +24,7 @@ pub fn create_new_rsa_private_key(key_name: &str) -> std::io::Result<()> {
     let key_buf = priv_key.to_pem_pkcs1().unwrap();
     // Write key to file
     file.write_all(key_buf.as_bytes())?;
+    println!("{}", UserMessage::SuccessfullyCreatedPrivateKey.value());
     Ok(())
 }
 
@@ -34,6 +36,7 @@ pub fn encrypt_data_with_private_key(
     password: &str,
     entry_name: &str,
 ) -> std::io::Result<Box<Entry>> {
+    println!("{}", UserMessage::EncryptBegin.value());
     let key_file_path = format!(
         "{}/{}.pem",
         GlobalConfiguration::KeyStoreDir.value().unwrap(),

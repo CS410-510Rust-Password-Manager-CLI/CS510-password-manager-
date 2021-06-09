@@ -12,8 +12,6 @@ use crate::generic::encryption::{create_new_rsa_private_key, encrypt_data_with_p
 use crate::generic::errors::{PasswordStoreError, Result};
 use crate::models::data_model::{Entry, EntryStore};
 
-// Todo: Bug fix: Creating two entries with the same name
-
 // Entry Point for creating a new data entry
 pub fn create_entry_point(store_name: &str) -> Result<'static, ()> {
     // Check if the requested store exists

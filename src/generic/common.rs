@@ -60,6 +60,12 @@ pub enum UserMessage<'a> {
     CreatedEntrySuccessfully(&'a str),
     // Inform user that entry has been successfully deleted from the manager
     DeletedEntrySuccessfully,
+    // Inform user that a new RSA private key is being generated
+    CreatingNewPrivateKey,
+    // Inform user that key creation was successful
+    SuccessfullyCreatedPrivateKey,
+    // Inform user that data is starting to be encrypted
+    EncryptBegin,
 }
 
 impl UserMessage<'_> {
@@ -82,6 +88,11 @@ impl UserMessage<'_> {
                 message
             }
             UserMessage::DeletedEntrySuccessfully => "Entry deleted successfully!".to_string(),
+            UserMessage::CreatingNewPrivateKey => "Creating new private key...".to_string(),
+            UserMessage::SuccessfullyCreatedPrivateKey => {
+                "Successfully created private key!".to_string()
+            }
+            UserMessage::EncryptBegin => "Encrypting...".to_string(),
         }
     }
 }
@@ -150,7 +161,6 @@ pub fn write_to_file<'a>(entry_store: &EntryStore, hashed_store_name: &str) -> R
     );
     let store_file = File::create(Path::new(&store_path)).unwrap();
     serde_json::to_writer(store_file, &entry_store).unwrap();
-    println!("Saved!");
     Ok(())
 }
 
