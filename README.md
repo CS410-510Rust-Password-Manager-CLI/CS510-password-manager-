@@ -38,6 +38,13 @@ and the binary will be located at `target/debug/password_manager`
         password_manager -s <NAME> get -e <ENTRY_NAME>
 
 ## Detailed guide:
+### Directory structure
+#### Top level `main.rs`
+#### Operations
+#### Generic
+#### Models
+#### Mocks
+
 ### Home directory for application
 ### How secrets are encrypted:
 #### Hashed Values
@@ -45,9 +52,20 @@ and the binary will be located at `target/debug/password_manager`
 ### Error handling
 
 ## Testing
+We preformed integration testing by hand. We did not have a library crate and could not figure out a way
+to import the project into an integration test module to live in the `/tests/` directory. We hand tested
+each functionality to ensure functionality. 
+
+Unit tests exist within files when appropriate for the function. Certain modules were mocked by selective 
+imports with `#[cfg(test)]` and `#[cfg(not(test))]` macros.
 
 ## Post-project retrospective
+We thought that most things in the project went pretty well. Nothing was too troublesome. 
+The problem arose during unit testing of the library functions that the different 
+components used. When researching how to unit test functions, most rust mocking frameworks limited you
+to mocking only traits and the project was not built with traits in mind. 
 
+Perhaps this was an un-rust like way to code the project. 
 
 ## License  
 This project is available under the 
