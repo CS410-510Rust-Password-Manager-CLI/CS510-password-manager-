@@ -65,15 +65,20 @@ Binary can also be downloaded from the [release page](https://github.com/CS410-5
 ### Directory structure
 #### Top level `main.rs`
 #### Operations `/operations/`
-- `create`
-- `delete`
-- `get`
-- `init`
-- `list`
-- `modify`
-#### Generic
-#### Models
-#### Mocks
+- `create.rs`
+- `delete.rs`
+- `get.rs`
+- `init.rs`
+- `list.rs`
+- `modify.rs`
+#### Generic `/generic/`
+- `common.rs`
+- `encryption.rs`
+- `errors.rs`
+#### Models `/models/`
+-`data_model.rs`
+#### Mocks `/mocks/`
+-`test_mocks.rs`
 
 ### Home directory for application
 ### How secrets are encrypted
