@@ -1,7 +1,4 @@
-use crate::generic::common::{
-    calculate_store_name_hash, does_store_exist, get_all_secrets, get_entry_names, get_index,
-    write_to_file, GlobalConfiguration, UserMessage,
-};
+use crate::generic::common::{calculate_store_name_hash, does_store_exist, get_entry_names, get_index, write_to_file, GlobalConfiguration, UserMessage, get_path, get_all_secrets_from_store};
 use crate::generic::errors::{PasswordStoreError, Result};
 use std::fs::remove_file;
 use std::io::{stdin, stdout, Write};
@@ -23,7 +20,8 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()> {
         return Err(PasswordStoreError::ErrorMisMatchStoreName);
     }
 
-    match get_entry_names(store_name) {
+    let path = *get_path(store_name);
+    match get_entry_names(&path) {
         Some(entry_names) => {
             for name in entry_names.iter() {
                 if let Err(e) = delete_entry(store_name, name) {
@@ -63,10 +61,11 @@ pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
         return Err(PasswordStoreError::ErrorStoreDoesNotExist);
     }
 
+    let store_path = *get_path(store_name);
     // Create fail back copy.
     // If errors occur in operation, write the copy back to disk
-    let failback_copy = get_all_secrets(store_name).unwrap();
-    let mut all_secrets_final = get_all_secrets(store_name).unwrap();
+    let failback_copy = get_all_secrets_from_store(&store_path).unwrap();
+    let mut all_secrets_final = get_all_secrets_from_store(&store_path).unwrap();
 
     let store_hash = calculate_store_name_hash(store_name).to_string();
     match get_index(entry_name, &(*all_secrets_final)) {

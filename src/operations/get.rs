@@ -1,4 +1,4 @@
-use crate::generic::common::{does_store_exist, get_all_secrets};
+use crate::generic::common::{does_store_exist, get_path, get_all_secrets_from_store};
 use crate::generic::encryption::decrypt_secret;
 use crate::generic::errors::{PasswordStoreError, Result};
 use crate::models::data_model::Entry;
@@ -10,8 +10,9 @@ pub fn display_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>
         return Err(PasswordStoreError::ErrorStoreEntryDoesNotExist);
     }
 
-    match get_raw_secret(store_name, entry_name) {
-        // Decypt the secret and display to console
+    let path = *get_path(store_name);
+    match get_raw_secret(&path, entry_name) {
+        // Decrypt the secret and display to console
         Some(raw_entry) => match decrypt_secret(entry_name, &(*raw_entry)) {
             Ok(()) => Ok(()),
             Err(e) => {
@@ -25,8 +26,8 @@ pub fn display_secret(store_name: &str, entry_name: &str) -> Result<'static, ()>
 
 // Iterates through EntryStores and returns a Box of the raw, unencrypted secret
 // matching the entry_name
-fn get_raw_secret(store_name: &str, entry_name: &str) -> Option<Box<Entry>> {
-    match get_all_secrets(store_name) {
+fn get_raw_secret(store_path: &str, entry_name: &str) -> Option<Box<Entry>> {
+    match get_all_secrets_from_store(store_path) {
         Some(secrets) => {
             // Iterate through all entries and return an entry matching the entry name
             for entry in (*secrets).entries {

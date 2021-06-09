@@ -321,6 +321,7 @@ dependencies = [
  "clap",
  "double",
  "home",
+ "project-root",
  "rand",
  "rand_core",
  "rpassword",
@@ -380,6 +381,12 @@ checksum = "f0d8caf72986c1a598726adc988bb5984792ef84f5ee5aa50209145ee8077038"
 dependencies = [
  "unicode-xid",
 ]
+
+[[package]]
+name = "project-root"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8bccbff07d5ed689c4087d20d7307a52ab6141edeedf487c3876a55b86cf63df"
 
 [[package]]
 name = "quote"

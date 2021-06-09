@@ -9,7 +9,10 @@ use std::io::BufReader;
 use std::path::Path;
 
 #[cfg(test)]
-use crate::mocks::test_mocks::home_dir;
+use crate::mocks::test_mocks::{
+    home_dir,
+};
+
 
 // Global Configurations for the password manager
 pub enum GlobalConfiguration {
@@ -129,15 +132,11 @@ pub fn does_store_exist(store_name: &str) -> bool {
     return Path::new(store_path).exists();
 }
 
-// Get all secrets from specific store
-pub fn get_all_secrets(store_name: &str) -> Option<Box<EntryStore>> {
-    let base_store_path = GlobalConfiguration::StoreDir.value().unwrap();
-    let store_hash = calculate_store_name_hash(store_name);
-    let store_path = format!("{0}/{1}.json", base_store_path, store_hash);
-
+// Get all secrets from a secret store
+pub fn get_all_secrets_from_store(path: &str) -> Option<Box<EntryStore>> {
     // Read data back to struct
     // Open the file in read-only mode with buffer.
-    let file = File::open(Path::new(&store_path)).unwrap();
+    let file = File::open(Path::new(path)).unwrap();
     let reader = BufReader::new(file);
     match serde_json::from_reader(reader) {
         Ok(secret_entries) => Some(Box::new(secret_entries)),
@@ -182,8 +181,8 @@ pub fn get_index(entry_name: &str, store: &EntryStore) -> Option<Box<usize>> {
 }
 
 // Return a Vec of entry names that exist in the store: store_name
-pub fn get_entry_names(store_name: &str) -> Option<Vec<String>> {
-    match get_all_secrets(store_name) {
+pub fn get_entry_names(path: &str) -> Option<Vec<String>> {
+    match get_all_secrets_from_store(path) {
         Some(entry_store) => {
             let mut entry_names = Vec::new();
             for entry in entry_store.entries {
@@ -197,6 +196,14 @@ pub fn get_entry_names(store_name: &str) -> Option<Vec<String>> {
         }
         None => None,
     }
+}
+
+// Returns a string with the path to the store_name
+pub fn get_path(store_name: &str) -> Box<String> {
+    let base_store_path = GlobalConfiguration::StoreDir.value().unwrap();
+    let store_hash = calculate_store_name_hash(store_name).to_string();
+    let path = format!("{0}/{1}.json", base_store_path, store_hash);
+    Box::new(path)
 }
 
 #[test]
@@ -217,4 +224,59 @@ fn get_keystore_dir() {
     let actual = GlobalConfiguration::KeyStoreDir.value().unwrap();
     let expected = "/home/.passmanager/.keys";
     assert_eq!(actual, expected)
+}
+
+#[test]
+fn getting_path_name(){
+    let actual = *get_path("foobar");
+    let expected = "/home/.passmanager/.store/13402334684424448340.json";
+    assert_eq!(actual, expected)
+}
+
+#[test]
+fn get_all_entries(){
+    let proj_root = project_root::get_project_root().unwrap();
+    let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
+    let actual = *get_all_secrets_from_store(&path).unwrap();
+
+    assert_eq!(3, actual.entries.len())
+}
+
+#[test]
+#[should_panic]
+fn get_all_entries_no_file(){
+    let proj_root = project_root::get_project_root().unwrap();
+    let path = format!("{}/resources/404", proj_root.to_str().unwrap());
+    let _actual = *get_all_secrets_from_store(&path).unwrap();
+}
+
+#[test]
+fn get_entries(){
+    let proj_root = project_root::get_project_root().unwrap();
+    let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
+    let actual = get_entry_names(&path).unwrap();
+
+    assert_eq!("foobar", actual[0]);
+    assert_eq!("foo2", actual[1])
+}
+
+#[test]
+fn get_index_with_entry(){
+    let proj_root = project_root::get_project_root().unwrap();
+    let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
+    let actual = *get_all_secrets_from_store(&path).unwrap();
+
+    let index = get_index("foobar", &actual).unwrap();
+
+    assert_eq!(0, *index);
+}
+
+#[test]
+#[should_panic]
+fn get_index_with_entry_not_found(){
+    let proj_root = project_root::get_project_root().unwrap();
+    let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
+    let actual = *get_all_secrets_from_store(&path).unwrap();
+
+    let _index = get_index("not_found", &actual).unwrap();
 }

@@ -1,6 +1,4 @@
-use crate::generic::common::{
-    calculate_store_name_hash, does_store_exist, get_all_secrets, write_to_file,
-};
+use crate::generic::common::{calculate_store_name_hash, does_store_exist, write_to_file, get_path, get_all_secrets_from_store};
 use crate::generic::errors::{PasswordStoreError, Result};
 
 use crate::operations::delete::delete_entry;
@@ -15,7 +13,8 @@ pub fn modify_entry<'a>(store_name: &str, entry_name: &str) -> Result<'a, ()> {
         return Err(PasswordStoreError::ErrorStoreDoesNotExist);
     }
 
-    let failback_copy = get_all_secrets(store_name);
+    let path = get_path(store_name);
+    let failback_copy = get_all_secrets_from_store(&path).unwrap();
     match delete_entry(store_name, entry_name) {
         Ok(()) => {
             let username: String = *get_username();
@@ -28,7 +27,7 @@ pub fn modify_entry<'a>(store_name: &str, entry_name: &str) -> Result<'a, ()> {
                     // Fail back if error occurs with modifying password after
                     // the entry has already been removed
                     match write_to_file(
-                        &(*failback_copy.unwrap()),
+                        &(*failback_copy),
                         &calculate_store_name_hash(entry_name).to_string(),
                     ) {
                         Ok(()) => Err(e),
