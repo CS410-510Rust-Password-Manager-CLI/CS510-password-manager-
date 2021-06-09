@@ -34,7 +34,7 @@ This project can be built with `cargo build`
 
 and the binary will be located at `target/debug/password_manager`  
 
-Binary can also be downloaded from the [release page](#https://github.com/CS410-510Rust-Password-Manager-CLI/CS510-password-manager-/releases)
+Binary can also be downloaded from the [release page](https://github.com/CS410-510Rust-Password-Manager-CLI/CS510-password-manager-/releases)
 ### Terminology
 `Secret Entry` - A secret entry is a named username and password pair
 
