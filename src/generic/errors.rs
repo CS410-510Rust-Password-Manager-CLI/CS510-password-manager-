@@ -38,6 +38,8 @@ pub enum PasswordStoreError<'a> {
     ErrorStoreNoData,
     #[error("Could not delete RSA Private Key!")]
     ErrorRSAKeyDelete,
+    #[error("Entry already exists!")]
+    ErrorEntryAlreadyExists,
 }
 
 pub type Result<'a, T> = std::result::Result<T, PasswordStoreError<'a>>;

@@ -111,7 +111,6 @@ fn clean_up_rsa_keys(key_name: &str) -> Result<'static, ()> {
         GlobalConfiguration::KeyStoreDir.value().unwrap(),
         key_name
     );
-    println!("{}", key_path);
     if let Err(e) = remove_file(key_path) {
         println!("{}", e.to_string());
         return Err(PasswordStoreError::ErrorRSAKeyDelete);

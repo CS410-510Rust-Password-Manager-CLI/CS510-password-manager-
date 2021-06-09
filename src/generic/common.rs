@@ -143,7 +143,6 @@ pub fn get_all_secrets_from_store(path: &str) -> Option<Box<EntryStore>> {
 
 //Write entry_store to file
 pub fn write_to_file<'a>(entry_store: &EntryStore, hashed_store_name: &str) -> Result<'a, ()> {
-    let serialized_data = serde_json::to_string(&entry_store).unwrap();
     let store_path = format!(
         "{0}/{1}.json",
         GlobalConfiguration::StoreDir.value().unwrap(),
