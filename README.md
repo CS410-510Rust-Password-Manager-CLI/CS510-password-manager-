@@ -64,7 +64,13 @@ Binary can also be downloaded from the [release page](https://github.com/CS410-5
 ## Detailed guide:
 ### Directory structure
 #### Top level `main.rs`
-#### Operations
+#### Operations `/operations/`
+- [create]
+- [delete]
+- [get]
+- [init]
+- [list]
+- [modify]
 #### Generic
 #### Models
 #### Mocks
