@@ -1,12 +1,26 @@
 # Password Manager CLI
 Authors: Tareq Jallad, Haohan Jiang  
 
+## Guide
+- [Description](#description)
+- [Usage](#usage-quick-guide)
+  - [Build](#build)
+  - [Terminology](#terminology)
+  - [Create a new store](#create-a-new-store)
+  - [Add a secret to store](#add-a-new-secret-to-the-store)
+  - [List all secrets in a store](#list-all-secrets-in-a-store)
+  - [Delete a secrets store](#delete-a-secrets-store)
+  - [Delete a secret entry in a secrets store](#delete-a-secret-entry-in-a-secrets-store)
+  - [Modify an existing entry in a secrets store](#modify-an-existing-entry-in-a-secrets-store)
+  - [Get an existing entry in a secrets store](#get-an-existing-entry-in-a-secrets-store)
+- [Detailed guide](#detailed-guide:)
+
 ## Description
 This project uses Rust to implement a command line password manager. This CLI application allows the user to
 create, delete, list, and modify secret entries and secret stores, all through the command line.
 For user security, all input passwords and usernames are encrypted by a randomly generated RSA Private key.
 
-## Usage quick guide:
+## Usage quick guide
 ### Build
 This project can be built with `cargo build`
 
@@ -31,10 +45,10 @@ and the binary will be located at `target/debug/password_manager`
 ### Delete a secret entry in a secrets store
         password_manager -s <NAME> delete-entry -e <ENTRY_NAME>
 
-### Modify an existing entry in a secrets store:
+### Modify an existing entry in a secrets store
         password_manager -s <NAME> modify -e <ENTRY_NAME>
 
-### Get an existing entry in a secrets store:
+### Get an existing entry in a secrets store
         password_manager -s <NAME> get -e <ENTRY_NAME>
 
 ## Detailed guide:
