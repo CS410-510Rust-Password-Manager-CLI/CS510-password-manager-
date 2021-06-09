@@ -41,25 +41,25 @@ Binary can also be downloaded from the [release page](https://github.com/CS410-5
 `Secret Store` - A list of secret entries
 
 ### Create a new store
-        password_manager -s <NAME> init
+        password_manager -s <NAME> --op init
 
 ### Add a new secret to the store
-        password_manager -s <NAME> create
+        password_manager -s <NAME> --op create
 
 ### List all secrets in a store
-        password_manager -s <NAME> list
+        password_manager -s <NAME> --op list
 
 ### Delete a secrets store
-        password_manager -s <NAME> delete-store
+        password_manager -s <NAME> --op delete-store
 
 ### Delete a secret entry in a secrets store
-        password_manager -s <NAME> delete-entry -e <ENTRY_NAME>
+        password_manager -s <NAME> --op delete-entry -e <ENTRY_NAME>
 
 ### Modify an existing entry in a secrets store
-        password_manager -s <NAME> modify -e <ENTRY_NAME>
+        password_manager -s <NAME> --op modify -e <ENTRY_NAME>
 
 ### Get an existing entry in a secrets store
-        password_manager -s <NAME> get -e <ENTRY_NAME>
+        password_manager -s <NAME> --op get -e <ENTRY_NAME>
 
 ## Detailed guide:
 ### Directory structure
