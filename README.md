@@ -64,6 +64,9 @@ Binary can also be downloaded from the [release page](https://github.com/CS410-5
 
 ## Detailed guide
 ### Directory structure
+At the root project level, `src` contains the source code for the project. `resources` contains 
+a test file for unit testing.
+
 #### Top level `main.rs`
 The entry point for the application. Houses command line argument logic and calls different
 modules based on user input.
