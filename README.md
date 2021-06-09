@@ -65,12 +65,12 @@ Binary can also be downloaded from the [release page](https://github.com/CS410-5
 ### Directory structure
 #### Top level `main.rs`
 #### Operations `/operations/`
-- [create]
-- [delete]
-- [get]
-- [init]
-- [list]
-- [modify]
+- `create`
+- `delete`
+- `get`
+- `init`
+- `list`
+- `modify`
 #### Generic
 #### Models
 #### Mocks
