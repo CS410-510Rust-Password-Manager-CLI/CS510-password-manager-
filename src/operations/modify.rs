@@ -1,8 +1,6 @@
 use crate::generic::common::{calculate_store_name_hash, does_store_exist, write_to_file, get_path, get_all_secrets_from_store};
 use crate::generic::errors::{PasswordStoreError, Result};
-
 use crate::operations::delete::delete_entry;
-
 use crate::operations::create::{add_to_store, get_password, get_username};
 
 // Modify a data entry

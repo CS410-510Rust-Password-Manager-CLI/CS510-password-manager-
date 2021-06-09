@@ -55,7 +55,6 @@ pub fn delete_secret_store(store_name: &str) -> Result<'static, ()> {
 }
 
 // Deletes a secret entry in a store
-// Todo: Enter secret again to delete
 pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
     if !does_store_exist(store_name) {
         return Err(PasswordStoreError::ErrorStoreDoesNotExist);

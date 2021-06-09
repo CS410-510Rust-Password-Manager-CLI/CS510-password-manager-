@@ -64,6 +64,9 @@ Binary can also be downloaded from the [release page](https://github.com/CS410-5
 ## Detailed guide:
 ### Directory structure
 #### Top level `main.rs`
+The entry point for the application. Houses command line argument logic and calls different
+modules based on user input.
+
 #### Operations `/operations/`
 - `create.rs`
 - `delete.rs`
@@ -71,20 +74,50 @@ Binary can also be downloaded from the [release page](https://github.com/CS410-5
 - `init.rs`
 - `list.rs`
 - `modify.rs`
+
+Operations directory contains the logic required for each specific operation. 
+
 #### Generic `/generic/`
 - `common.rs`
 - `encryption.rs`
 - `errors.rs`
+
+Generics directory contains functionality that is used across the app. 
+
 #### Models `/models/`
 -`data_model.rs`
+
+Models directory contains the data model that is serialized and deserialized through JSON.
+
 #### Mocks `/mocks/`
 -`test_mocks.rs`
 
+Mocks directory contains a function that is used to override an external function during unit testing.
+`test_mocks.rs` contains a function that is only called during unit tests which raises a compiler warning during
+`build`. So, we decided to suppress the warning with the macro `#![allow(dead_code)]` 
+
 ### Home directory for application
+The base directory for this application is: `HOME/.passmanager`.
+
+All secrets stores are located at: `HOME/.passmanager/.stores/<STORE_NAME>.json`
+
+All secret keys are located at: `HOME/.passmanager/.keys/<KEY_NAME>.pem`
+
 ### How secrets are encrypted
+Secrets and secret stores are encrypted in two different ways. First, we encrypt the store name and the entry name.
+Second, we also encrypt the username and password for each entry using a RSA private key generated specifically for that
+secret entry. 
+
 #### Hashed Values
+Secret store names and RSA private keys are stored under hashed value. 
+
 #### RSA Encrypted Values
+Usernames and passwords are encrypted by a RSA public key generated from it's RSA private key. The key is stored under
+the hashed entry name so that the private key can be retrieved to decrypt the username and password. 
+
 ### Error handling
+Application errors can handled under `/generics/errors`. External library errors are caught and re-raised as an internal
+error up to the top level caller. 
 
 ## Testing
 We preformed integration testing by hand. We did not have a library crate and could not figure out a way
