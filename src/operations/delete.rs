@@ -106,10 +106,11 @@ pub fn delete_entry(store_name: &str, entry_name: &str) -> Result<'static, ()> {
 // Clean up RSA keys of deleted entries
 fn clean_up_rsa_keys(key_name: &str) -> Result<'static, ()> {
     let key_path = format!(
-        "{}/{}.json",
+        "{}/{}.pem",
         GlobalConfiguration::KeyStoreDir.value().unwrap(),
         key_name
     );
+    println!("{}", key_path);
     if let Err(e) = remove_file(key_path) {
         println!("{}", e.to_string());
         return Err(PasswordStoreError::ErrorRSAKeyDelete);

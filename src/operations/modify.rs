@@ -20,7 +20,7 @@ pub fn modify_entry<'a>(store_name: &str, entry_name: &str) -> Result<'a, ()> {
         Ok(()) => {
             let username: String = *get_username();
             let password: String = *(get_password().unwrap());
-            let keyname = calculate_store_name_hash(store_name).to_string();
+            let keyname = calculate_store_name_hash(entry_name).to_string();
 
             match add_to_store(&keyname, &username, &password, store_name, entry_name) {
                 Ok(()) => Ok(()),
