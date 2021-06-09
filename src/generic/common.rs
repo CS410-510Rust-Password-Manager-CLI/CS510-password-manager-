@@ -149,8 +149,6 @@ pub fn write_to_file<'a>(entry_store: &EntryStore, hashed_store_name: &str) -> R
         GlobalConfiguration::StoreDir.value().unwrap(),
         hashed_store_name
     );
-    println!("Path: {}", store_path);
-    println!("Data: {}", serialized_data);
     let store_file = File::create(Path::new(&store_path)).unwrap();
     serde_json::to_writer(store_file, &entry_store).unwrap();
     println!("Saved!");
