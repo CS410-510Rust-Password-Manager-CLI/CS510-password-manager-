@@ -14,6 +14,7 @@ Authors: Tareq Jallad, Haohan Jiang
   - [Modify an existing entry in a secrets store](#modify-an-existing-entry-in-a-secrets-store)
   - [Get an existing entry in a secrets store](#get-an-existing-entry-in-a-secrets-store)
 - [Detailed guide](#detailed-guide)
+  - [Directory structure](#directory-structure)
   - [Home directory for application](#home-directory-for-application)
   - [How secrets are encrypted](#how-secrets-are-encrypted)
   - [Hashed Values](#hashed-values)
