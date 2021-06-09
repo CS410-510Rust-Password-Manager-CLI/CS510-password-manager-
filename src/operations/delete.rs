@@ -1,4 +1,7 @@
-use crate::generic::common::{calculate_store_name_hash, does_store_exist, get_entry_names, get_index, write_to_file, GlobalConfiguration, UserMessage, get_path, get_all_secrets_from_store};
+use crate::generic::common::{
+    calculate_store_name_hash, does_store_exist, get_all_secrets_from_store, get_entry_names,
+    get_index, get_path, write_to_file, GlobalConfiguration, UserMessage,
+};
 use crate::generic::errors::{PasswordStoreError, Result};
 use std::fs::remove_file;
 use std::io::{stdin, stdout, Write};

@@ -108,26 +108,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "double"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc3b28c212ee85ba07a9323f5363f3f21587a95d1958ea7367a0d913626b5dc4"
-dependencies = [
- "float-cmp",
- "lazysort",
- "maplit",
-]
-
-[[package]]
-name = "float-cmp"
-version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08117a43ef6d98f44f38cadd33b996d2322bf460422fceccb4fa03930ca231f0"
-dependencies = [
- "num",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.14.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -207,12 +187,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lazysort"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0e22ff43b231e0e2f87d74984e53ebc73b90ae13397e041214fb07efc64168f"
-
-[[package]]
 name = "libc"
 version = "0.2.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -223,23 +197,6 @@ name = "libm"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7d73b3f436185384286bd8098d17ec07c9a7d2388a6599f824d8502b529702a"
-
-[[package]]
-name = "maplit"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
-
-[[package]]
-name = "num"
-version = "0.1.42"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4703ad64153382334aa8db57c637364c322d3372e097840c72000dabdcf6156e"
-dependencies = [
- "num-integer",
- "num-iter",
- "num-traits",
-]
 
 [[package]]
 name = "num-bigint"
@@ -319,7 +276,6 @@ version = "0.1.0"
 dependencies = [
  "base64-compat",
  "clap",
- "double",
  "home",
  "project-root",
  "rand",

@@ -4,7 +4,10 @@ use std::str;
 use text_io::read;
 
 // Internal libraries
-use crate::generic::common::{calculate_store_name_hash, does_store_exist, write_to_file, UserMessage, get_all_secrets_from_store, get_path};
+use crate::generic::common::{
+    calculate_store_name_hash, does_store_exist, get_all_secrets_from_store, get_path,
+    write_to_file, UserMessage,
+};
 use crate::generic::encryption::{create_new_rsa_private_key, encrypt_data_with_private_key};
 use crate::generic::errors::{PasswordStoreError, Result};
 use crate::models::data_model::{Entry, EntryStore};
@@ -49,7 +52,6 @@ pub fn add_to_store<'a>(
     store_name: &str,
     entry_name: &str,
 ) -> Result<'a, ()> {
-
     let hashed_store_name = calculate_store_name_hash(store_name).to_string();
     let path = *get_path(store_name);
     match encrypt(key_name, username, password, entry_name) {

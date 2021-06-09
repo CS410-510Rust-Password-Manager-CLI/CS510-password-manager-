@@ -1,4 +1,4 @@
-use crate::generic::common::{does_store_exist, get_path, get_all_secrets_from_store};
+use crate::generic::common::{does_store_exist, get_all_secrets_from_store, get_path};
 use crate::generic::encryption::decrypt_secret;
 use crate::generic::errors::{PasswordStoreError, Result};
 use crate::models::data_model::Entry;

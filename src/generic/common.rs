@@ -9,10 +9,7 @@ use std::io::BufReader;
 use std::path::Path;
 
 #[cfg(test)]
-use crate::mocks::test_mocks::{
-    home_dir,
-};
-
+use crate::mocks::test_mocks::home_dir;
 
 // Global Configurations for the password manager
 pub enum GlobalConfiguration {
@@ -227,14 +224,14 @@ fn get_keystore_dir() {
 }
 
 #[test]
-fn getting_path_name(){
+fn getting_path_name() {
     let actual = *get_path("foobar");
     let expected = "/home/.passmanager/.store/13402334684424448340.json";
     assert_eq!(actual, expected)
 }
 
 #[test]
-fn get_all_entries(){
+fn get_all_entries() {
     let proj_root = project_root::get_project_root().unwrap();
     let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
     let actual = *get_all_secrets_from_store(&path).unwrap();
@@ -244,14 +241,14 @@ fn get_all_entries(){
 
 #[test]
 #[should_panic]
-fn get_all_entries_no_file(){
+fn get_all_entries_no_file() {
     let proj_root = project_root::get_project_root().unwrap();
     let path = format!("{}/resources/404", proj_root.to_str().unwrap());
     let _actual = *get_all_secrets_from_store(&path).unwrap();
 }
 
 #[test]
-fn get_entries(){
+fn get_entries() {
     let proj_root = project_root::get_project_root().unwrap();
     let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
     let actual = get_entry_names(&path).unwrap();
@@ -261,7 +258,7 @@ fn get_entries(){
 }
 
 #[test]
-fn get_index_with_entry(){
+fn get_index_with_entry() {
     let proj_root = project_root::get_project_root().unwrap();
     let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
     let actual = *get_all_secrets_from_store(&path).unwrap();
@@ -273,7 +270,7 @@ fn get_index_with_entry(){
 
 #[test]
 #[should_panic]
-fn get_index_with_entry_not_found(){
+fn get_index_with_entry_not_found() {
     let proj_root = project_root::get_project_root().unwrap();
     let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
     let actual = *get_all_secrets_from_store(&path).unwrap();
