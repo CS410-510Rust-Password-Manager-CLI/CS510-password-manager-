@@ -14,6 +14,13 @@ Authors: Tareq Jallad, Haohan Jiang
   - [Modify an existing entry in a secrets store](#modify-an-existing-entry-in-a-secrets-store)
   - [Get an existing entry in a secrets store](#get-an-existing-entry-in-a-secrets-store)
 - [Detailed guide](#detailed-guide)
+  - [Home directory for application](#home-directory-for-application)
+  - [How secrets are encrypted](#how-secrets-are-encrypted)
+  - [Hashed Values](#hashed-values)
+  - [RSA Encrypted Values](#rsa-encrypted-values)
+  - [Error handling](#error-handling)
+- [Testing](#testing)
+- [Post-project retrospective](#post-project-retrospective)
 
 ## Description
 This project uses Rust to implement a command line password manager. This CLI application allows the user to
@@ -53,7 +60,7 @@ and the binary will be located at `target/debug/password_manager`
 
 ## Detailed guide:
 ### Home directory for application
-### How secrets are encrypted:
+### How secrets are encrypted
 #### Hashed Values
 #### RSA Encrypted Values
 ### Error handling
