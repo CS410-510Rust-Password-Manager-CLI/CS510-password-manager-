@@ -157,7 +157,11 @@ The problem arose during unit testing of the library functions that the differen
 components used. When researching how to unit test functions, most rust mocking frameworks limited you
 to mocking only traits and the project was not built with traits in mind. 
 
-Perhaps this was an un-rust like way to code the project. 
+Perhaps this was an un-rust like way to code the project.
+
+We are satisfied with the results as we believe that we created a great simple app that can be useful
+to the right target audience. We went into this project with the goal of creating a usable product and to that end
+I think we succeeded. 
 
 ## License  
 This project is available under the 
