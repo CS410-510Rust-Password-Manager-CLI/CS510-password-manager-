@@ -41,3 +41,22 @@ fn get_raw_secret(store_path: &str, entry_name: &str) -> Option<Box<Entry>> {
         None => None,
     }
 }
+
+#[test]
+fn get_secrets(){
+    let proj_root = project_root::get_project_root().unwrap();
+    let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
+
+    let actual = get_raw_secret(&path, "foobar").unwrap();
+
+    assert_eq!("foobar", actual.name)
+}
+
+#[test]
+#[should_panic]
+fn secrets_not_found(){
+    let proj_root = project_root::get_project_root().unwrap();
+    let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
+
+    let actual = get_raw_secret(&path, "notfound").unwrap();
+}
