@@ -66,7 +66,12 @@ pub fn main() {
         )
         .get_matches();
 
-    let store_name = matches.value_of("store_name").unwrap();
+    let store_name = matches.value_of("store_name").unwrap_or("");
+    if store_name.is_empty() {
+        println!("You must supply a valid store name!");
+        std::process::exit(1);
+    }
+
     if let Some(op) = matches.value_of("op") {
         match op {
             "init" => {
@@ -87,27 +92,42 @@ pub fn main() {
                     std::process::exit(1);
                 }
             }
-            "delete-entry" => {
-                let entry_name = matches.value_of("entry_name").unwrap();
-                if let Err(e) = operations::delete::delete_entry(store_name, entry_name) {
-                    println!("{}", e);
+            "delete-entry" => match matches.value_of("entry_name") {
+                Some(entry_name) => {
+                    if let Err(e) = operations::delete::delete_entry(store_name, entry_name) {
+                        println!("{}", e);
+                        std::process::exit(1);
+                    }
+                }
+                None => {
+                    println!("No entry name for operation DELETE-ENTRY");
                     std::process::exit(1);
                 }
-            }
-            "get" => {
-                let entry_name = matches.value_of("entry_name").unwrap();
-                if let Err(e) = operations::get::display_secret(store_name, entry_name) {
-                    println!("{}", e);
+            },
+            "get" => match matches.value_of("entry_name") {
+                Some(entry_name) => {
+                    if let Err(e) = operations::get::display_secret(store_name, entry_name) {
+                        println!("{}", e);
+                        std::process::exit(1);
+                    }
+                }
+                None => {
+                    println!("No entry name for operation GET");
                     std::process::exit(1);
                 }
-            }
-            "modify" => {
-                let entry_name = matches.value_of("entry_name").unwrap();
-                if let Err(e) = operations::modify::modify_entry(store_name, entry_name) {
-                    println!("{}", e);
+            },
+            "modify" => match matches.value_of("entry_name") {
+                Some(entry_name) => {
+                    if let Err(e) = operations::modify::modify_entry(store_name, entry_name) {
+                        println!("{}", e);
+                        std::process::exit(1);
+                    }
+                }
+                None => {
+                    println!("No entry name for operation MODIFY");
                     std::process::exit(1);
                 }
-            }
+            },
             "list" => {
                 if let Err(e) = operations::list::list_all_entries(store_name) {
                     println!("{}", e);
