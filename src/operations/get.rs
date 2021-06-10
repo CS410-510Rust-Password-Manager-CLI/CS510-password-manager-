@@ -43,7 +43,7 @@ fn get_raw_secret(store_path: &str, entry_name: &str) -> Option<Box<Entry>> {
 }
 
 #[test]
-fn get_secrets(){
+fn get_secrets() {
     let proj_root = project_root::get_project_root().unwrap();
     let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
 
@@ -54,7 +54,7 @@ fn get_secrets(){
 
 #[test]
 #[should_panic]
-fn secrets_not_found(){
+fn secrets_not_found() {
     let proj_root = project_root::get_project_root().unwrap();
     let path = format!("{}/resources/test.json", proj_root.to_str().unwrap());
 
